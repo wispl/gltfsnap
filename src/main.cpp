@@ -13,11 +13,13 @@
 
 #include <iostream>
 
-static void error_callback(int error, const char* description) {
+static void error_callback(int error, const char* description)
+{
 	fprintf(stderr, "Error: %s\n", description);
 }
 
-static void glMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
+static void glMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+{
 	if (severity == GL_DEBUG_SEVERITY_HIGH) {
 		std::cerr << message << '\n';
 	} else {
@@ -25,7 +27,8 @@ static void glMessageCallback(GLenum source, GLenum type, GLuint id, GLenum seve
 	}
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
 	bool running = true;
 	GLFWwindow* window;
 	glfwSetErrorCallback(error_callback);

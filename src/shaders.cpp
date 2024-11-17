@@ -64,7 +64,8 @@ constexpr std::string_view frag_shader = R"(
 	}
 )";
 
-std::optional<GLuint> compile_program() {
+std::optional<GLuint> compile_program()
+{
 	GLint success;
 	std::string log;
 	auto program = glCreateProgram();
