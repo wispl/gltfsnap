@@ -1,5 +1,6 @@
 #include "shaders.h"
 #include "gltf.h"
+#include "scene.h"
 
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
@@ -55,7 +56,24 @@ int main(int argc, char** argv) {
 	auto file = std::string_view { + argv[1] };
 	auto gltf = load_gltf(file);
 
+	GLuint vao;
+        glCreateVertexArrays(1, &vao);
+
+	glEnableVertexArrayAttrib(vao, 0);
+	glEnableVertexArrayAttrib(vao, 1);
+
+	glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, pos));
+	glVertexArrayAttribFormat(vao, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, uv));
+
+	glVertexArrayAttribBinding(vao, 0, 0);
+	glVertexArrayAttribBinding(vao, 1, 0);
+	glBindVertexArray(vao);
+
+	glEnable(GL_DEPTH_TEST);
+
 	while (glfwWindowShouldClose(window) != GLFW_TRUE) {
+		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwSwapBuffers(window);
 	}
 
@@ -66,6 +84,7 @@ int main(int argc, char** argv) {
 	//                buffer + (width * 4 * (height - 1)),
 	//                -width * 4);
 
+	glDeleteProgram(*program);
 	glfwDestroyWindow(window);
 
 	glfwTerminate();

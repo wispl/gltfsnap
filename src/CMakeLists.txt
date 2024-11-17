@@ -4,6 +4,8 @@ target_sources(${PROJECT_NAME}
 		gltf.cpp
 		gltf.h
 		main.cpp
+		scene.cpp
+		scene.h
 		shaders.cpp
 		shaders.h
 		stb_image.c
