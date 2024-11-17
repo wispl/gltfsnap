@@ -1,3 +1,5 @@
+#pragma once
+
 #include <fastgltf/types.hpp>
 #include <glad/gl.h>
 
