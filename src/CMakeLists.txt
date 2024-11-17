@@ -1,7 +1,11 @@
 target_sources(${PROJECT_NAME}
 	PRIVATE
+		gl.c
+		gltf.cpp
+		gltf.h
 		main.cpp
 		shaders.cpp
 		shaders.h
-		gl.c
-		stb_image_write.c)
+		stb_image.c
+		stb_image_write.c
+)

@@ -1,4 +1,5 @@
 #include "shaders.h"
+#include "gltf.h"
 
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
@@ -12,10 +13,10 @@
 
 #include <iostream>
 
-struct Vertex {
-    vec3 position;
-    vec2 uv;
-};
+// struct Vertex {
+//     vec3 position;
+//     vec2 uv;
+// };
 
 static void error_callback(int error, const char* description) {
     fprintf(stderr, "Error: %s\n", description);
