@@ -6,7 +6,6 @@
 #include <GLFW/glfw3.h>
 
 // #include <stb_image_write.h>
-#include <linmath.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,7 +24,8 @@ static void glMessageCallback(GLenum source, GLenum type, GLuint id, GLenum seve
 	}
 }
 
-int main(void) {
+int main(int argc, char** argv) {
+	bool running = true;
 	GLFWwindow* window;
 	glfwSetErrorCallback(error_callback);
 	if (!glfwInit())
@@ -33,9 +33,9 @@ int main(void) {
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-	// glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
 
-	window = glfwCreateWindow(640, 480, "objsnap", NULL, NULL);
+	window = glfwCreateWindow(640, 480, "objsnap", nullptr, nullptr);
 	if (!window) {
 		glfwTerminate();
 		exit(EXIT_FAILURE);
@@ -49,8 +49,15 @@ int main(void) {
 	glDebugMessageCallback(glMessageCallback, nullptr);
 
 	auto program = compile_program();
+	glUseProgram(*program);
 
+	// add "./" in front of the path
+	auto file = std::string_view { + argv[1] };
+	auto gltf = load_gltf(file);
 
+	while (glfwWindowShouldClose(window) != GLFW_TRUE) {
+		glfwSwapBuffers(window);
+	}
 
 	// glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	// Write image Y-flipped because OpenGL
