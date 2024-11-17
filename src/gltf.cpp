@@ -3,7 +3,6 @@
 #include <fastgltf/types.hpp>
 #include <fastgltf/core.hpp>
 #include <fastgltf/tools.hpp>
-#include <linmath.h>
 #include <stb_image.h>
 
 static GLsizei level_count(int width, int height)
