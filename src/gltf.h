@@ -12,7 +12,8 @@ struct Texture {
 
 struct Material {
 	fastgltf::math::fvec4 base_color;
-	// TODO: roughness and metallic
+	float metallic;
+	float roughness;
 };
 
 // Texture and position coordinates, we interleave vertice data.

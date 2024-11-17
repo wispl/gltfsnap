@@ -63,7 +63,11 @@ static Texture load_texture(fastgltf::Asset& asset, fastgltf::Image& image)
 
 static Material load_material(fastgltf::Material& material)
 {
-	return Material{ material.pbrData.baseColorFactor };
+	return Material{
+		material.pbrData.baseColorFactor,
+		material.pbrData.metallicFactor,
+		material.pbrData.roughnessFactor,
+	};
 }
 
 static Mesh load_mesh(fastgltf::Asset& asset, std::vector<Texture>& textures, fastgltf::Mesh& gltf_mesh)
@@ -165,7 +169,8 @@ LoadedGLTF load_gltf(std::filesystem::path path)
 	// TODO: we are doing this for every mesh which is not really good,
 	// there should be a global cache which handles all textures and
 	// materials
-	loaded_gltf.materials.push_back(Material{ fastgltf::math::fvec4(1.0f) });
+	// default material
+	loaded_gltf.materials.push_back(Material{ fastgltf::math::fvec4(1.0f), 1.0f, 1.0f });
 	for (auto& material : asset.materials) {
 		loaded_gltf.materials.push_back(load_material(material));
 	}
