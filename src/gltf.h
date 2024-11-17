@@ -11,7 +11,8 @@ struct Texture {
 };
 
 struct Material {
-	fastgltf::math::fvec4 baseColorFactor;
+	fastgltf::math::fvec4 base_color;
+	// TODO: roughness and metallic
 };
 
 // Texture and position coordinates, we interleave vertice data.
@@ -36,6 +37,7 @@ struct DrawCommand {
 struct Primitive {
 	DrawCommand draw_command;
 	std::size_t material_id;
+	GLint albedo_texture;
 
 	// TODO: see if these are neccessary, it might be possible to always
 	// assume drawing triangles and an uint32_t as the index type

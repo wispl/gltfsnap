@@ -66,7 +66,7 @@ static Material load_material(fastgltf::Material& material)
 	return Material{ material.pbrData.baseColorFactor };
 }
 
-static Mesh load_mesh(fastgltf::Asset& asset, fastgltf::Mesh& gltf_mesh)
+static Mesh load_mesh(fastgltf::Asset& asset, std::vector<Texture>& textures, fastgltf::Mesh& gltf_mesh)
 {
 	Mesh mesh;
 	std::vector<Vertex> vertices;
@@ -84,7 +84,7 @@ static Mesh load_mesh(fastgltf::Asset& asset, fastgltf::Mesh& gltf_mesh)
 			vertices.push_back(Vertex{ pos, fastgltf::math::fvec2() });
 		});
 
-		// texture
+		// uv
 		auto* uv = it.findAttribute("TEXCOORD_0");
 		if (uv != it.attributes.end()) {
 			auto& uv_accessor = asset.accessors[uv->accessorIndex];
@@ -93,11 +93,29 @@ static Mesh load_mesh(fastgltf::Asset& asset, fastgltf::Mesh& gltf_mesh)
 			});
 		}
 
+
+		// std::size_t texcoord_index = 0;
+
 		// materials
 		if (it.materialIndex.has_value()) {
+			// get material uniform
 			primitive.material_id = it.materialIndex.value() + 1; // adjust for default material
-			// TODO: handle albedo
-			// auto& material = asset.materials[it->materialIndex.value()];
+
+			// get texture
+			auto& base_texture = asset.materials[it.materialIndex.value()].pbrData.baseColorTexture;
+			if (base_texture.has_value()) {
+				auto& texture = asset.textures[base_texture->textureIndex];
+				primitive.albedo_texture = textures[texture.imageIndex.value()].id;
+
+				// TODO: see if the below is needed, apparently texcoord_index may not always be 0
+				// if (base_texture->transform && base_texture->transform->texCoordIndex.has_value()) {
+				// 	texcoord_index = base_texture->transform->texCoordIndex.value();
+				// } else {
+				// 	texcoord_index = base_texture.->texCoordIndex;
+				// }
+			}
+		} else {
+			primitive.material_id = 0;
 		}
 
 		// indices
@@ -148,7 +166,7 @@ LoadedGLTF load_gltf(std::filesystem::path path)
 		loaded_gltf.materials.push_back(load_material(material));
 	}
 	for (auto& mesh : asset.meshes) {
-		loaded_gltf.meshes.push_back(load_mesh(asset, mesh));
+		loaded_gltf.meshes.push_back(load_mesh(asset, loaded_gltf.textures, mesh));
 	}
 
 	// TODO: material buffer
