@@ -162,6 +162,10 @@ LoadedGLTF load_gltf(std::filesystem::path path)
 	for (auto& image : asset.images) {
 		loaded_gltf.textures.push_back(load_texture(asset, image));
 	}
+	// TODO: we are doing this for every mesh which is not really good,
+	// there should be a global cache which handles all textures and
+	// materials
+	loaded_gltf.materials.push_back(Material{ fastgltf::math::fvec4(1.0f) });
 	for (auto& material : asset.materials) {
 		loaded_gltf.materials.push_back(load_material(material));
 	}
