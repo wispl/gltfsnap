@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.24)
 
 project(gltfsnap)
 
@@ -16,12 +16,14 @@ FetchContent_Declare(
 	GIT_REPOSITORY  https://github.com/glfw/glfw.git
 	GIT_TAG	        3.4
 	GIT_SHALLOW     TRUE
+	FIND_PACKAGE_ARGS NAMES glfw3
 )
 FetchContent_Declare(
 	fastgltf
 	GIT_REPOSITORY  https://github.com/spnda/fastgltf.git
 	GIT_TAG	        v0.8.0
 	GIT_SHALLOW     TRUE
+	FIND_PACKAGE_ARGS
 )
 FetchContent_MakeAvailable(glfw fastgltf)
 message(STATUS "Finished fetching dependencies!")
