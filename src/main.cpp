@@ -13,17 +13,17 @@
 
 #include <iostream>
 
-static void error_callback(int error, const char* description)
+static void glfw_error_callback(int error, const char* description)
 {
-	fprintf(stderr, "Error: %s\n", description);
+	std::cerr << "Error: " << description << "\n";
 }
 
-static void glMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+static void opengl_error_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
 	if (severity == GL_DEBUG_SEVERITY_HIGH) {
-		std::cerr << message << '\n';
+		std::cerr << message << "\n";
 	} else {
-		std::cout << message << '\n';
+		std::cout << message << "\n";
 	}
 }
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 {
 	bool running = true;
 	GLFWwindow* window;
-	glfwSetErrorCallback(error_callback);
+	glfwSetErrorCallback(glfw_error_callback);
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
 
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	glDebugMessageCallback(glMessageCallback, nullptr);
+	glDebugMessageCallback(opengl_error_callback, nullptr);
 
 	auto program = compile_program();
 	glUseProgram(*program);
