@@ -38,6 +38,10 @@ struct Primitive {
 	// are indices to the actual values in the material and texture arrays.
 	std::size_t material_idx;
 	std::size_t texture_idx;
+	// Eventually we want to sort primitives based on something like
+	// material so there is less binding. In that case we need the index to
+	// the command since the order is no longer the same.
+	std::size_t command_idx;
 
 	// TODO: see if these are neccessary, it might be possible to always
 	// assume drawing triangles and an uint32_t as the index type

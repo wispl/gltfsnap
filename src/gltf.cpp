@@ -122,6 +122,7 @@ static bool load_mesh(LoadedGLTF& gltf, fastgltf::Asset& asset, fastgltf::Mesh& 
 
 		// indices
 		auto& index_accessor = asset.accessors[it.indicesAccessor.value()];
+		primitive.command_idx = gltf.commands.size();
 		DrawCommand cmd = {
 			.count = static_cast<std::uint32_t>(index_accessor.count),
 			.instance_count = 1,
