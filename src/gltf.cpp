@@ -5,12 +5,13 @@
 #include <fastgltf/tools.hpp>
 #include <stb_image.h>
 
+// Most of the code here is from fastgltf's gltf viewer example.
+
 static GLsizei level_count(int width, int height)
 {
 	return static_cast<GLsizei>(1 + floor(log2(width > height ? width : height)));
 }
 
-// From fastgltf
 static Texture load_texture(fastgltf::Asset& asset, fastgltf::Image& image)
 {
 	Texture texture;
@@ -19,12 +20,12 @@ static Texture load_texture(fastgltf::Asset& asset, fastgltf::Image& image)
 	std::visit(fastgltf::visitor {
 		[](auto& arg) {},
 		[&](fastgltf::sources::URI& filePath) {
-			assert(filePath.fileByteOffset == 0); // We don't support offsets with stbi.
-			assert(filePath.uri.isLocalPath()); // We're only capable of loading local files.
+			assert(filePath.fileByteOffset == 0);
+			assert(filePath.uri.isLocalPath());
 
 			int width, height, nrChannels;
 
-			const std::string path(filePath.uri.path().begin(), filePath.uri.path().end()); // Thanks C++.
+			const std::string path(filePath.uri.path().begin(), filePath.uri.path().end());
 			unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 4);
 			glTextureStorage2D(texture.id, level_count(width, height), GL_RGBA8, width, height);
 			glTextureSubImage2D(texture.id, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -57,6 +58,7 @@ static Texture load_texture(fastgltf::Asset& asset, fastgltf::Image& image)
 	      }
 	}, image.data);
 
+	// TODO: samplers
 	glGenerateTextureMipmap(texture.id);
 	return texture;
 }
@@ -70,46 +72,44 @@ static Material load_material(fastgltf::Material& material)
 	};
 }
 
-static Mesh load_mesh(fastgltf::Asset& asset, std::vector<Texture>& textures, fastgltf::Mesh& gltf_mesh)
+static bool load_mesh(LoadedGLTF& gltf, fastgltf::Asset& asset, fastgltf::Mesh& gltf_mesh)
 {
 	Mesh mesh;
-	std::vector<Vertex> vertices;
-	std::vector<std::uint32_t> indices;
-
 	for (auto&& it : gltf_mesh.primitives) {
 		Primitive primitive;
-		size_t initial = vertices.size();
 
 		// position
+		size_t vertices_start = gltf.vertices.size();
 		auto* pos = it.findAttribute("POSITION");
 		auto& pos_accessor = asset.accessors[pos->accessorIndex];
-		vertices.resize(initial + pos_accessor.count);
 		fastgltf::iterateAccessor<fastgltf::math::fvec3>(asset, pos_accessor, [&](fastgltf::math::fvec3 pos) {
-			vertices.push_back(Vertex{ pos, fastgltf::math::fvec2() });
+			gltf.vertices.push_back(Vertex{ pos, fastgltf::math::fvec2() });
 		});
+		size_t vertices_size = gltf.vertices.size() - vertices_start;
 
 		// uv
+		//
+		// There might be more than one texture and thus more than one
+		// texcoord, ignore that for now to keep it simple.
 		auto* uv = it.findAttribute("TEXCOORD_0");
 		if (uv != it.attributes.end()) {
 			auto& uv_accessor = asset.accessors[uv->accessorIndex];
 			fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec2>(asset, uv_accessor, [&](fastgltf::math::fvec2 uv, size_t index) {
-				vertices[initial + index].uv = uv;
+				gltf.vertices[vertices_start + index].uv = uv;
 			});
 		}
 
-
-		// std::size_t texcoord_index = 0;
-
-		// materials
+		// materials and textures
+		primitive.material_idx = 0;
 		if (it.materialIndex.has_value()) {
-			// get material uniform
-			primitive.material_id = it.materialIndex.value() + 1; // adjust for default material
-
-			// get texture
+			primitive.material_idx = it.materialIndex.value() + 1; // adjust for default material
 			auto& base_texture = asset.materials[it.materialIndex.value()].pbrData.baseColorTexture;
 			if (base_texture.has_value()) {
 				auto& texture = asset.textures[base_texture->textureIndex];
-				primitive.albedo_texture = textures[texture.imageIndex.value()].id;
+				if (!texture.imageIndex.has_value()) {
+					return false;
+				}
+				primitive.texture_idx = texture.imageIndex.value();
 
 				// TODO: see if the below is needed, apparently texcoord_index may not always be 0
 				// if (base_texture->transform && base_texture->transform->texCoordIndex.has_value()) {
@@ -118,31 +118,28 @@ static Mesh load_mesh(fastgltf::Asset& asset, std::vector<Texture>& textures, fa
 				// 	texcoord_index = base_texture.->texCoordIndex;
 				// }
 			}
-		} else {
-			primitive.material_id = 0;
 		}
 
 		// indices
 		auto& index_accessor = asset.accessors[it.indicesAccessor.value()];
-		primitive.draw_command.instance_count = 1;
-		primitive.draw_command.base_instance = 0;
-		primitive.draw_command.base_vertex = initial;
-		primitive.draw_command.first_index = indices.size();
-		primitive.draw_command.count = static_cast<std::uint32_t>(index_accessor.count);
+		DrawCommand cmd = {
+			.count = static_cast<std::uint32_t>(index_accessor.count),
+			.instance_count = 1,
+			.first_index = static_cast<std::uint32_t>(gltf.indices.size()),
+			.base_vertex = static_cast<std::uint32_t>(vertices_start),
+			.base_instance = 0
+		};
+		gltf.commands.push_back(cmd);
+
 		fastgltf::iterateAccessor<std::uint32_t>(asset, index_accessor, [&](std::uint32_t idx) {
-			indices.push_back(idx + initial);
+			gltf.indices.push_back(idx);
 		});
 
 		mesh.primitives.push_back(primitive);
-
-		glCreateBuffers(1, &mesh.vertex_buffer);
-		glCreateBuffers(1, &mesh.index_buffer);
-		// TODO: change these to static later on
-		glNamedBufferStorage(mesh.vertex_buffer, sizeof(Vertex) * vertices.size(), &vertices[0], GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferStorage(mesh.index_buffer, sizeof(std::uint32_t) * indices.size(), &indices[0], GL_DYNAMIC_STORAGE_BIT);
 	}
 
-	return mesh;
+	gltf.meshes.push_back(mesh);
+	return true;
 }
 
 LoadedGLTF load_gltf(std::filesystem::path path)
@@ -159,23 +156,22 @@ LoadedGLTF load_gltf(std::filesystem::path path)
 		| fastgltf::Options::GenerateMeshIndices;
 
 	auto gltf = fastgltf::MappedGltfFile::FromPath(path);
-
 	
 	fastgltf::Parser parser(extensions);
         auto asset = std::move(parser.loadGltf(gltf.get(), path.parent_path(), options).get());
+
 	for (auto& image : asset.images) {
 		loaded_gltf.textures.push_back(load_texture(asset, image));
 	}
-	// TODO: we are doing this for every mesh which is not really good,
-	// there should be a global cache which handles all textures and
-	// materials
+
 	// default material
 	loaded_gltf.materials.push_back(Material{ fastgltf::math::fvec4(1.0f), 1.0f, 1.0f });
 	for (auto& material : asset.materials) {
 		loaded_gltf.materials.push_back(load_material(material));
 	}
+
 	for (auto& mesh : asset.meshes) {
-		loaded_gltf.meshes.push_back(load_mesh(asset, loaded_gltf.textures, mesh));
+		load_mesh(loaded_gltf, asset, mesh);
 	}
 
 	// TODO: material buffer
