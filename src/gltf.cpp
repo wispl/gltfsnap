@@ -162,6 +162,8 @@ LoadedGLTF load_gltf(std::filesystem::path path)
 	fastgltf::Parser parser(extensions);
         auto asset = std::move(parser.loadGltf(gltf.get(), path.parent_path(), options).get());
 
+	assert(asset.scenes.size() == 1);
+
 	for (auto& image : asset.images) {
 		load_texture(loaded_gltf, asset, image);
 	}
@@ -176,7 +178,12 @@ LoadedGLTF load_gltf(std::filesystem::path path)
 		load_mesh(loaded_gltf, asset, mesh);
 	}
 
-	// TODO: material buffer
-	
+	fastgltf::iterateSceneNodes(asset, 0, fastgltf::math::fmat4x4(),
+	    [&](fastgltf::Node& node, fastgltf::math::fmat4x4 transform) {
+		    if (node.meshIndex.has_value()) {
+			     loaded_gltf.meshnodes.push_back(MeshNode { transform, *node.meshIndex });
+		    }
+	});
+
 	return loaded_gltf;
 }

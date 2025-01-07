@@ -50,8 +50,12 @@ struct Primitive {
 };
 
 struct Mesh {
-	fastgltf::math::fmat4x4 transform;
 	std::vector<Primitive> primitives;
+};
+
+struct MeshNode {
+	fastgltf::math::fmat4x4 transform;
+	std::size_t mesh_idx;
 };
 
 // Contains all information needed to render a GLTF. Meshes depend on materials
@@ -64,6 +68,8 @@ struct LoadedGLTF {
 	std::vector<Texture> textures;
 	std::vector<Material> materials;
 	std::vector<Mesh> meshes;
+
+	std::vector<MeshNode> meshnodes;
 };
 
 LoadedGLTF load_gltf(std::filesystem::path path);
