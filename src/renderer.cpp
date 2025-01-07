@@ -11,7 +11,7 @@ Renderer::Renderer(GLuint program)
 	glEnableVertexArrayAttrib(vao, 1);
 
 	glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, pos));
-	glVertexArrayAttribFormat(vao, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, uv));
+	glVertexArrayAttribFormat(vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, uv));
 
 	glVertexArrayAttribBinding(vao, 0, 0);
 	glVertexArrayAttribBinding(vao, 1, 0);
