@@ -31,7 +31,7 @@ constexpr std::string_view frag_shader = R"(
 	out vec4 fragcolor;
 
 	layout(location = 0) uniform sampler2D albedoTexture;
-	layout(location = 0, std140) uniform Material {
+	layout(binding = 0, std140) uniform Material {
 		vec4 base_color;
 		float metallic;
 		float roughness;
@@ -40,7 +40,7 @@ constexpr std::string_view frag_shader = R"(
 	void main() {
 		vec4 color = material.base_color;
 		// color *= texture(albedo_texture, texcoord);
-		fragcolor = base_color;
+		fragcolor = material.base_color;
 	}
 )";
 
