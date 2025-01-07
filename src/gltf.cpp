@@ -12,7 +12,7 @@ static GLsizei level_count(int width, int height)
 	return static_cast<GLsizei>(1 + floor(log2(width > height ? width : height)));
 }
 
-static Texture load_texture(fastgltf::Asset& asset, fastgltf::Image& image)
+static void load_texture(LoadedGLTF& gltf, fastgltf::Asset& asset, fastgltf::Image& image)
 {
 	Texture texture;
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture.id);
@@ -60,16 +60,17 @@ static Texture load_texture(fastgltf::Asset& asset, fastgltf::Image& image)
 
 	// TODO: samplers
 	glGenerateTextureMipmap(texture.id);
-	return texture;
+	gltf.textures.push_back(texture);
 }
 
-static Material load_material(fastgltf::Material& material)
+static void load_material(LoadedGLTF& gltf, fastgltf::Material& material)
 {
-	return Material{
+
+	gltf.materials.push_back(Material{
 		material.pbrData.baseColorFactor,
 		material.pbrData.metallicFactor,
 		material.pbrData.roughnessFactor,
-	};
+	});
 }
 
 static bool load_mesh(LoadedGLTF& gltf, fastgltf::Asset& asset, fastgltf::Mesh& gltf_mesh)
@@ -162,13 +163,13 @@ LoadedGLTF load_gltf(std::filesystem::path path)
         auto asset = std::move(parser.loadGltf(gltf.get(), path.parent_path(), options).get());
 
 	for (auto& image : asset.images) {
-		loaded_gltf.textures.push_back(load_texture(asset, image));
+		load_texture(loaded_gltf, asset, image);
 	}
 
 	// default material
 	loaded_gltf.materials.push_back(Material{ fastgltf::math::fvec4(1.0f), 1.0f, 1.0f });
 	for (auto& material : asset.materials) {
-		loaded_gltf.materials.push_back(load_material(material));
+		load_material(loaded_gltf, material);
 	}
 
 	for (auto& mesh : asset.meshes) {
