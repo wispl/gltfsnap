@@ -9,10 +9,14 @@ class Renderer {
 public:
 	Renderer(GLuint program);
 	void update_scene(Scene& scene);
+	void update_window(int new_width, int new_height);
 	void update();
 	void render() const;
 	void loop();
 private:
+	// window data
+	int width, height;
+
 	// gl buffers
 	GLuint vertex_buffer, index_buffer, command_buffer;
 	GLuint vao;

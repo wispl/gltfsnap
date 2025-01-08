@@ -44,6 +44,13 @@ void Renderer::update_scene(Scene& scene)
 	scene_dirty = true;
 }
 
+void Renderer::update_window(int new_width, int new_height)
+{
+	width = new_width;
+	height = new_height;
+	glViewport(0, 0, width, height);
+}
+
 void Renderer::update()
 {
 	// TODO: This is pretty expensive, could optimise later, or just leave it
@@ -92,7 +99,7 @@ void Renderer::render() const
 	// set camera uniforms
 	auto view = camera.view_matrix();
 	// TODO: set these to actual window widths
-	auto proj = glm::perspective(glm::radians(70.0f), (1000.f / 200.f), 10000.f, 0.1f);
+	auto proj = glm::perspective(glm::radians(70.0f), (static_cast<float>(width) / height), 10000.f, 0.1f);
 	proj[1][1] *= -1;
 	auto view_proj = proj * view;
 	glUniformMatrix4fv(view_proj_uniform, 1, GL_FALSE, &view_proj[0][0]);

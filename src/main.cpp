@@ -35,14 +35,16 @@ int main(int argc, char** argv)
 	bool running = true;
 	GLFWwindow* window;
 	glfwSetErrorCallback(glfw_error_callback);
-	if (!glfwInit())
+	if (!glfwInit()) {
 		exit(EXIT_FAILURE);
+	}
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-	window = glfwCreateWindow(640, 480, "objsnap", nullptr, nullptr);
+	window = glfwCreateWindow(640, 480, "objsnap", NULL, NULL);
 	if (!window) {
 		glfwTerminate();
 		exit(EXIT_FAILURE);
@@ -61,6 +63,15 @@ int main(int argc, char** argv)
 
 	auto program = compile_program();
 	auto renderer = Renderer(*program);
+	renderer.update_window(640, 480);
+
+	glfwSetWindowUserPointer(window, reinterpret_cast<void*>(&renderer));
+
+	auto resize_callback = [](GLFWwindow* window, int width, int height) {
+		static_cast<Renderer*>(glfwGetWindowUserPointer(window))->update_window(width, height);
+	};
+
+	glfwSetFramebufferSizeCallback(window, resize_callback);
 
 	auto scene = Scene();
 	Node node = { .gltf = gltf, .transform = glm::mat4(1.0f) };
@@ -71,6 +82,7 @@ int main(int argc, char** argv)
 	while (glfwWindowShouldClose(window) != GLFW_TRUE) {
 		renderer.loop();
 		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
 
 	// glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
