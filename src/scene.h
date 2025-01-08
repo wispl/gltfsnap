@@ -27,6 +27,5 @@ struct Node {
 };
 
 struct Scene {
-	Camera camera;
 	std::vector<Node> nodes;
 };

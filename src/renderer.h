@@ -21,7 +21,7 @@ private:
 	bool scene_dirty = false;
 	Scene curr_scene;
 	Scene next_scene;
-	fastgltf::math::fmat4x4 view_projection;
+	Camera camera;
 
 	// uniforms and ubo
 	GLuint model_uniform;
