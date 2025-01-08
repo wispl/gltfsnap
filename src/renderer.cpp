@@ -27,7 +27,7 @@ Renderer::Renderer(GLuint program)
 	model_uniform = glGetUniformLocation(program, "model");
 	view_proj_uniform = glGetUniformLocation(program, "view_proj");
 	glCreateBuffers(1, &material_ubo);
-	glNamedBufferStorage(material_ubo, static_cast<GLsizeiptr>(sizeof(Material)), nullptr, GL_MAP_WRITE_BIT);
+	glNamedBufferStorage(material_ubo, static_cast<GLsizeiptr>(sizeof(Material)), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -63,15 +63,17 @@ void Renderer::update()
 		glCreateBuffers(1, &index_buffer);
 		glCreateBuffers(1, &command_buffer);
 
-		glNamedBufferStorage(vertex_buffer, sizeof(Vertex) * vertices.size(), &vertices[0], GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferStorage(index_buffer, sizeof(std::uint32_t) * indices.size(), &indices[0], GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferStorage(command_buffer, sizeof(std::uint32_t) * commands.size(), &commands[0], GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(vertex_buffer, sizeof(Vertex) * vertices.size(), vertices.data(), GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(index_buffer, sizeof(std::uint32_t) * indices.size(), indices.data(), GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(command_buffer, sizeof(DrawCommand) * commands.size(), commands.data(), GL_DYNAMIC_STORAGE_BIT);
 		scene_dirty = false;
 	}
 }
 
 void Renderer::render() const
 {
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// bind global mesh buffers
 	glVertexArrayVertexBuffer(vao, 0, vertex_buffer, 0, sizeof(Vertex));
 	glVertexArrayElementBuffer(vao, index_buffer);
@@ -90,8 +92,14 @@ void Renderer::render() const
 				glBindTextureUnit(0, texture.id);
 				glNamedBufferSubData(material_ubo, 0, sizeof(Material), reinterpret_cast<const void*>(&material));
 
-				glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, reinterpret_cast<const void*>(primitive.command_idx * sizeof(Primitive)), 1, 0);
+				glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, reinterpret_cast<const void*>(sizeof(DrawCommand) * primitive.command_idx));
 			}
 		}
 	}
+}
+
+void Renderer::loop()
+{
+	update();
+	render();
 }

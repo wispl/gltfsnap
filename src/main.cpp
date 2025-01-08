@@ -1,6 +1,7 @@
-#include "shaders.h"
 #include "gltf.h"
+#include "renderer.h"
 #include "scene.h"
+#include "shaders.h"
 
 #include <glad/gl.h>
 #define GLFW_INCLUDE_NONE
@@ -52,16 +53,21 @@ int main(int argc, char** argv)
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(opengl_error_callback, nullptr);
 
-	auto program = compile_program();
-	glUseProgram(*program);
-
 	// add "./" in front of the path
 	auto file = std::string_view { + argv[1] };
 	auto gltf = load_gltf(file);
 
+	auto program = compile_program();
+	auto renderer = Renderer(*program);
+
+	auto scene = Scene();
+	Node node = { .gltf = gltf, .transform = fastgltf::math::fmat4x4() };
+	scene.nodes.push_back(node);
+
+	renderer.update_scene(scene);
+
 	while (glfwWindowShouldClose(window) != GLFW_TRUE) {
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		renderer.loop();
 		glfwSwapBuffers(window);
 	}
 

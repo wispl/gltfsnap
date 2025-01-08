@@ -11,6 +11,7 @@ public:
 	void update_scene(Scene& scene);
 	void update();
 	void render() const;
+	void loop();
 private:
 	// gl buffers
 	GLuint vertex_buffer, index_buffer, command_buffer;
