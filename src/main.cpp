@@ -7,6 +7,8 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <glm/mat4x4.hpp>
+
 // #include <stb_image_write.h>
 
 #include <stdlib.h>
@@ -61,7 +63,7 @@ int main(int argc, char** argv)
 	auto renderer = Renderer(*program);
 
 	auto scene = Scene();
-	Node node = { .gltf = gltf, .transform = fastgltf::math::fmat4x4() };
+	Node node = { .gltf = gltf, .transform = glm::mat4(1.0f) };
 	scene.nodes.push_back(node);
 
 	renderer.update_scene(scene);
