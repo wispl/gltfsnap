@@ -2,6 +2,9 @@
 
 #include "gltf.h"
 
+#include <glm/vec3.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 template <typename T>
 static void merge(std::vector<T>& a, std::vector<T>& b) {
 	a.reserve(a.size() + b.size());
@@ -28,6 +31,8 @@ Renderer::Renderer(GLuint program)
 	view_proj_uniform = glGetUniformLocation(program, "view_proj");
 	glCreateBuffers(1, &material_ubo);
 	glNamedBufferStorage(material_ubo, static_cast<GLsizeiptr>(sizeof(Material)), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+	camera.update_position(glm::vec3{ 0.f, 0.f, 5.0f });
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -74,11 +79,21 @@ void Renderer::render() const
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// bind global mesh buffers
+
+	// bind global buffers
 	glVertexArrayVertexBuffer(vao, 0, vertex_buffer, 0, sizeof(Vertex));
 	glVertexArrayElementBuffer(vao, index_buffer);
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, command_buffer);
+
+	// bind material uniform buffer
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, material_ubo);
+
+	// set camera uniforms
+	auto view = camera.view_matrix();
+	// TODO: set these to actual window widths
+	auto proj = glm::perspective(glm::radians(70.0f), (1000.f / 200.f), 10000.f, 0.1f);
+	auto view_proj = proj * view;
+	glUniformMatrix4fv(view_proj_uniform, 1, GL_FALSE, &view_proj[0][0]);
 
 	for (auto& node : curr_scene.nodes) {
 		for (auto& meshnode : node.gltf.meshnodes) {
