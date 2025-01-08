@@ -1,8 +1,15 @@
 #include "gltf.h"
 
-#include <fastgltf/types.hpp>
+#include <fastgltf/glm_element_traits.hpp>
 #include <fastgltf/core.hpp>
 #include <fastgltf/tools.hpp>
+
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/vec4.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
+
 #include <stb_image.h>
 
 // Most of the code here is from fastgltf's gltf viewer example.
@@ -65,9 +72,8 @@ static void load_texture(LoadedGLTF& gltf, fastgltf::Asset& asset, fastgltf::Ima
 
 static void load_material(LoadedGLTF& gltf, fastgltf::Material& material)
 {
-
 	gltf.materials.push_back(Material{
-		material.pbrData.baseColorFactor,
+		glm::make_vec4(material.pbrData.baseColorFactor.data()),
 		material.pbrData.metallicFactor,
 		material.pbrData.roughnessFactor,
 	});
@@ -83,8 +89,8 @@ static bool load_mesh(LoadedGLTF& gltf, fastgltf::Asset& asset, fastgltf::Mesh& 
 		size_t vertices_start = gltf.vertices.size();
 		auto* pos = it.findAttribute("POSITION");
 		auto& pos_accessor = asset.accessors[pos->accessorIndex];
-		fastgltf::iterateAccessor<fastgltf::math::fvec3>(asset, pos_accessor, [&](fastgltf::math::fvec3 pos) {
-			gltf.vertices.push_back(Vertex{ pos, fastgltf::math::fvec2() });
+		fastgltf::iterateAccessor<glm::vec3>(asset, pos_accessor, [&](glm::vec3 pos) {
+			gltf.vertices.push_back(Vertex{ pos, glm::vec2() });
 		});
 		size_t vertices_size = gltf.vertices.size() - vertices_start;
 
@@ -95,7 +101,7 @@ static bool load_mesh(LoadedGLTF& gltf, fastgltf::Asset& asset, fastgltf::Mesh& 
 		auto* uv = it.findAttribute("TEXCOORD_0");
 		if (uv != it.attributes.end()) {
 			auto& uv_accessor = asset.accessors[uv->accessorIndex];
-			fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec2>(asset, uv_accessor, [&](fastgltf::math::fvec2 uv, size_t index) {
+			fastgltf::iterateAccessorWithIndex<glm::vec2>(asset, uv_accessor, [&](glm::vec2 uv, size_t index) {
 				gltf.vertices[vertices_start + index].uv = uv;
 			});
 		}
@@ -162,6 +168,7 @@ LoadedGLTF load_gltf(std::filesystem::path path)
 	fastgltf::Parser parser(extensions);
         auto asset = std::move(parser.loadGltf(gltf.get(), path.parent_path(), options).get());
 
+	// TODO: handle more than one scenes later
 	assert(asset.scenes.size() == 1);
 
 	for (auto& image : asset.images) {
@@ -169,7 +176,7 @@ LoadedGLTF load_gltf(std::filesystem::path path)
 	}
 
 	// default material
-	loaded_gltf.materials.push_back(Material{ fastgltf::math::fvec4(1.0f), 1.0f, 1.0f });
+	loaded_gltf.materials.push_back(Material{ glm::vec4(1.0f), 1.0f, 1.0f });
 	for (auto& material : asset.materials) {
 		load_material(loaded_gltf, material);
 	}
@@ -181,7 +188,7 @@ LoadedGLTF load_gltf(std::filesystem::path path)
 	fastgltf::iterateSceneNodes(asset, 0, fastgltf::math::fmat4x4(),
 	    [&](fastgltf::Node& node, fastgltf::math::fmat4x4 transform) {
 		    if (node.meshIndex.has_value()) {
-			     loaded_gltf.meshnodes.push_back(MeshNode { transform, *node.meshIndex });
+			     loaded_gltf.meshnodes.push_back(MeshNode { glm::make_mat4(transform.data()), *node.meshIndex });
 		    }
 	});
 

@@ -1,8 +1,10 @@
 #pragma once
 
-#include <fastgltf/types.hpp>
 #include <glad/gl.h>
+#include <glm/mat4x4.hpp>
+#include <glm/vec4.hpp>
 
+#include <filesystem>
 #include <vector>
 
 struct Texture {
@@ -11,15 +13,15 @@ struct Texture {
 
 // TODO: it might make more sense to store texture inside material
 struct Material {
-	fastgltf::math::fvec4 base_color;
+	glm::vec4 base_color;
 	float metallic;
 	float roughness;
 };
 
 // Texture and position coordinates, the data is interleaved.
 struct Vertex {
-	fastgltf::math::fvec3 pos;
-	fastgltf::math::fvec2 uv;
+	glm::vec3 pos;
+	glm::vec2 uv;
 };
 
 // A OpenGL struct which species a draw command for MultiDrawElements.
@@ -54,7 +56,7 @@ struct Mesh {
 };
 
 struct MeshNode {
-	fastgltf::math::fmat4x4 transform;
+	glm::mat4 transform;
 	std::size_t mesh_idx;
 };
 
