@@ -33,6 +33,7 @@ Renderer::Renderer(GLuint program)
 	glNamedBufferStorage(material_ubo, static_cast<GLsizeiptr>(sizeof(Material)), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 	camera.update_position(glm::vec3{ 0.f, 0.f, 5.0f });
+	camera.update_velocity(glm::vec3(0.0f));
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -92,6 +93,7 @@ void Renderer::render() const
 	auto view = camera.view_matrix();
 	// TODO: set these to actual window widths
 	auto proj = glm::perspective(glm::radians(70.0f), (1000.f / 200.f), 10000.f, 0.1f);
+	proj[1][1] *= -1;
 	auto view_proj = proj * view;
 	glUniformMatrix4fv(view_proj_uniform, 1, GL_FALSE, &view_proj[0][0]);
 
