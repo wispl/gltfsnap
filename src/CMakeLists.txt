@@ -3,6 +3,8 @@ target_sources(${PROJECT_NAME}
 		gl.c
 		gltf.cpp
 		gltf.h
+		input.cpp
+		input.h
 		main.cpp
 		renderer.cpp
 		renderer.h
