@@ -47,7 +47,6 @@ constexpr std::string_view frag_shader = R"(
 std::optional<GLuint> compile_program()
 {
 	GLint success;
-	std::string log;
 	auto program = glCreateProgram();
 
 	std::vector<std::pair<std::string_view, GLuint>> shaders = {
@@ -65,9 +64,10 @@ std::optional<GLuint> compile_program()
 		if (!success) {
 			GLint length;
 			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+			std::vector<char> log(length);
 
 			glGetShaderInfoLog(shader, length, nullptr, log.data());
-			std::cout << "Failed to compile shader: " << log << "\n";
+			std::cout << "Failed to compile shaders:" << std::string(log.data(), log.size()) << "\n";
 			return std::nullopt;
 		}
 
@@ -78,10 +78,11 @@ std::optional<GLuint> compile_program()
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 	if (!success) {
 		GLint length;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &success);
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+		std::vector<char> log(length);
 
 		glGetProgramInfoLog(program, length, nullptr, log.data());
-		std::cout << "Failed to link shaders:" << log << "\n";
+		std::cout << "Failed to link shaders:" << std::string(log.data(), log.size()) << "\n";
 		return std::nullopt;
 	}
 
