@@ -68,7 +68,7 @@ void process_axis(uint32_t axis, float value)
 			.value = value,
 			.sensitivity = range.sensitivity,
 			.min = range.min,
-			.max = range.min,
+			.max = range.max,
 		};
 	}
 }
