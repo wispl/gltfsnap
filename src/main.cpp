@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 		// Gets the last state of the key, good for detecting if it is held since
 		// GLFW_REPEAT is for text input only and not reliable for this usecase.
 		bool pressed_before = glfwGetKey(window, key) == GLFW_PRESS;
-		input::process_button(key, (action == GLFW_PRESS), pressed_before);
+		input::process_button(key, (action != GLFW_RELEASE), pressed_before);
 	};
 
 	glfwSetFramebufferSizeCallback(window, resize_callback);
