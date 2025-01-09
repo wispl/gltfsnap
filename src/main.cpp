@@ -32,6 +32,19 @@ static void opengl_error_callback(GLenum source, GLenum type, GLuint id, GLenum 
 	}
 }
 
+static float last_x, last_y = 0;
+static void mouse_callback(GLFWwindow* window, double x, double y)
+{
+	float x_offset = static_cast<float>(x) - last_x;
+	float y_offset = last_y - static_cast<float>(y);
+	last_x = static_cast<float>(x);
+	last_y = static_cast<float>(y);
+	input::process_axis(DefaultRanges::MOUSE_X, x_offset);
+	input::process_axis(DefaultRanges::MOUSE_Y, y_offset);
+}
+
+static 
+
 int main(int argc, char** argv)
 {
 	bool running = true;
@@ -123,6 +136,13 @@ int main(int argc, char** argv)
 			renderer.camera.stop(Direction::LEFT);
 		}
 	});
+	input::add_callback([&renderer](auto data) {
+		auto x_range = data.get_range(DefaultRanges::MOUSE_X);
+		auto y_range = data.get_range(DefaultRanges::MOUSE_Y);
+		if (x_range.has_value() and y_range.has_value()) {
+			renderer.camera.rotate((*x_range).value, (*y_range).value);
+		}
+	});
 
 	// Set userdata on the window to the renderer to access it during callbacks
 	glfwSetWindowUserPointer(window, reinterpret_cast<void*>(&renderer));
@@ -140,6 +160,7 @@ int main(int argc, char** argv)
 
 	glfwSetFramebufferSizeCallback(window, resize_callback);
 	glfwSetKeyCallback(window, key_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
 
 	auto scene = Scene();
 	Node node = { .gltf = gltf, .transform = glm::mat4(1.0f) };
