@@ -1,5 +1,6 @@
 target_sources(${PROJECT_NAME}
 	PRIVATE
+		actionset.h
 		gl.c
 		gltf.cpp
 		gltf.h
