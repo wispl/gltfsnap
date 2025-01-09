@@ -1,4 +1,5 @@
 #include "gltf.h"
+#include "input.h"
 #include "renderer.h"
 #include "scene.h"
 #include "shaders.h"
@@ -65,13 +66,22 @@ int main(int argc, char** argv)
 	auto renderer = Renderer(*program);
 	renderer.update_window(640, 480);
 
+	// Set userdata on the window to the renderer to access it during callbacks
 	glfwSetWindowUserPointer(window, reinterpret_cast<void*>(&renderer));
 
 	auto resize_callback = [](GLFWwindow* window, int width, int height) {
 		static_cast<Renderer*>(glfwGetWindowUserPointer(window))->update_window(width, height);
 	};
 
+	auto key_callback = [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+		// Gets the last state of the key, good for detecting if it is held since
+		// GLFW_REPEAT is for text input only and not reliable for this usecase.
+		bool pressed_before = glfwGetKey(window, key) == GLFW_PRESS;
+		input::process_button(key, (action == GLFW_PRESS), pressed_before);
+	};
+
 	glfwSetFramebufferSizeCallback(window, resize_callback);
+	glfwSetKeyCallback(window, key_callback);
 
 	auto scene = Scene();
 	Node node = { .gltf = gltf, .transform = glm::mat4(1.0f) };
