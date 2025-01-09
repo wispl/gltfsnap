@@ -1,3 +1,4 @@
+#include "actionset.h"
 #include "gltf.h"
 #include "input.h"
 #include "renderer.h"
@@ -66,6 +67,18 @@ int main(int argc, char** argv)
 	auto renderer = Renderer(*program);
 	renderer.update_window(640, 480);
 
+	input::ActionSet main(
+		ActionSets::DEFAULT,
+		std::vector{
+			input::Action{ DefaultActions::FORWARD,	 GLFW_KEY_W, "Move Foward" },
+			input::Action{ DefaultActions::BACKWARD, GLFW_KEY_S, "Move Backward" },
+			input::Action{ DefaultActions::LEFT,	 GLFW_KEY_A, "Move Left" },
+			input::Action{ DefaultActions::RIGHT, 	 GLFW_KEY_D, "Move Right" },
+			input::Action{ DefaultActions::QUIT, 	 GLFW_KEY_Q, "Quit" }
+		}
+	);
+	input::add_actionset(main);
+	input::enable_actionset(ActionSets::DEFAULT);
 	// Set userdata on the window to the renderer to access it during callbacks
 	glfwSetWindowUserPointer(window, reinterpret_cast<void*>(&renderer));
 
@@ -89,10 +102,18 @@ int main(int argc, char** argv)
 
 	renderer.update_scene(scene);
 
+	// TODO: could be better
+	float last_frame, curr_frame, delta_time = 0;
 	while (glfwWindowShouldClose(window) != GLFW_TRUE) {
+		float current_frame = glfwGetTime();
+		delta_time = current_frame - last_frame;
+		last_frame = current_frame;
+		// TODO: decide if we want this in the renderer, deltatime also
+		// has to be moved in that case
+		input::update(delta_time);
+		glfwPollEvents();
 		renderer.loop();
 		glfwSwapBuffers(window);
-		glfwPollEvents();
 	}
 
 	// glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
