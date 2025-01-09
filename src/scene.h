@@ -8,7 +8,7 @@
 // Forward declare
 class LoadedGLTF;
 
-enum class Direction { FOWARD, RIGHT, LEFT, BACKWARD };
+enum class Direction { FORWARD, RIGHT, LEFT, BACKWARD };
 
 class Camera {
 public:
@@ -17,12 +17,14 @@ public:
 
 	void update();
 	void move(Direction direction, float delta_time);
+	// TODO: remove `stop` after camera is exposed outside of `Renderer`
+	void stop(Direction direction);
 	void rotate(float yaw_add, float pitch_add);
 
 	void set_position(glm::vec3 new_pos);
 	void set_speed(float new_vel);
 private:
-	glm::vec3 position, velocity;
+	glm::vec3 position, velocity { 0.0f };
 	float speed = 1.0f;
 
 	float pitch { 0.0f };

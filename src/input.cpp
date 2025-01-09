@@ -8,7 +8,7 @@ namespace input {
 
 static MappedData mapped_data;
 
-// TODO: might want this to be a vector as well
+// TODO: might want this to be a vector as well, use a reference_wrapper in that case
 static ActionSet* enabled;
 static std::vector<ActionSet> actionsets;
 static std::vector<InputCallback> callbacks;
@@ -38,6 +38,8 @@ void enable_actionset(uint32_t id)
 	// TODO: handle no actionset found
 }
 
+// TODO: the `held` key is not used when `pressed` is false, which is weird,
+// split into two functions?
 void process_button(uint32_t button, bool pressed, bool held)
 {
 	assert(enabled != nullptr);

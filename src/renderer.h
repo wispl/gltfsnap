@@ -7,6 +7,8 @@
 
 class Renderer {
 public:
+	Camera camera;
+
 	Renderer(GLuint program);
 	void update_scene(Scene& scene);
 	void update_window(int new_width, int new_height);
@@ -25,7 +27,6 @@ private:
 	bool scene_dirty = false;
 	Scene curr_scene;
 	Scene next_scene;
-	Camera camera;
 
 	// uniforms and ubo
 	GLuint model_uniform;

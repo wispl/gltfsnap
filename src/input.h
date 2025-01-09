@@ -8,6 +8,7 @@
 #include <vector>
 
 // TODO: handle cursors and controllers
+// TODO: switch to strings instead of enums? Convenient, but not typos...
 
 /// Input
 ///
@@ -15,7 +16,7 @@
 ///
 /// This abstracts raw inputs into some game or user defined term. Oftentimes,
 /// the input consumer does not need or want to know that 'w' was pressed,
-/// rather, they want to know if a button to MOVE_FORWARD was pressed. Besided
+/// rather, they want to know if a button to MOVE_FORWARD was pressed. Besides
 /// being easier to reason about, it also allows for sane remapping.
 ///
 /// An `Action` represents this idea, representing a mapping between a raw
@@ -41,14 +42,14 @@ namespace input {
 struct Action {
 	uint32_t code;		// user defined code
 	uint32_t raw;		// raw input
-	std::string desc;	// name or desc of the action
+	std::string desc;	// name or description of the action
 };
 
 struct ActionSet {
 	uint32_t id;
 	std::unordered_map<uint32_t, Action> action_map; // mapping of raw input to action
 
-	ActionSet(uint32_t id, std::vector<Action>& actions) : id(id) {
+	ActionSet(uint32_t id, const std::vector<Action>& actions) : id(id) {
 		// TODO: warn on duplicate keys?
 		for (const auto& action : actions) {
 			action_map[action.raw] = action;

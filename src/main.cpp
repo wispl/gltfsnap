@@ -79,6 +79,29 @@ int main(int argc, char** argv)
 	);
 	input::add_actionset(main);
 	input::enable_actionset(ActionSets::DEFAULT);
+
+	input::add_callback([&window](auto data) {
+		glfwSetWindowShouldClose(window, data.is_pressed(DefaultActions::QUIT));
+	});
+	input::add_callback([&renderer](auto data) {
+		// TODO: the flow here is really weird, find another method?
+		if (data.is_held(DefaultActions::FORWARD)) {
+			renderer.camera.move(Direction::FORWARD, data.delta_time);
+		} else if (data.is_held(DefaultActions::BACKWARD)) {
+			renderer.camera.move(Direction::BACKWARD, data.delta_time);
+		} else {
+			renderer.camera.stop(Direction::FORWARD);
+		}
+
+		if (data.is_held(DefaultActions::LEFT)) {
+			renderer.camera.move(Direction::LEFT, data.delta_time);
+		} else if (data.is_held(DefaultActions::RIGHT)) {
+			renderer.camera.move(Direction::RIGHT, data.delta_time);
+		} else {
+			renderer.camera.stop(Direction::LEFT);
+		}
+	});
+
 	// Set userdata on the window to the renderer to access it during callbacks
 	glfwSetWindowUserPointer(window, reinterpret_cast<void*>(&renderer));
 
@@ -108,10 +131,10 @@ int main(int argc, char** argv)
 		float current_frame = glfwGetTime();
 		delta_time = current_frame - last_frame;
 		last_frame = current_frame;
+		glfwPollEvents();
 		// TODO: decide if we want this in the renderer, deltatime also
 		// has to be moved in that case
 		input::update(delta_time);
-		glfwPollEvents();
 		renderer.loop();
 		glfwSwapBuffers(window);
 	}

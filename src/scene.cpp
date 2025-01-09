@@ -24,17 +24,27 @@ glm::mat4 Camera::rotation_matrix() const
 
 void Camera::update()
 {
-    glm::mat4 rotation = rotation_matrix();
-    position += glm::vec3(rotation * glm::vec4(velocity * 0.5f, 0.f));
+	position += glm::vec3(rotation_matrix() * glm::vec4(velocity * 0.5f, 0.0f));
 }
 
 void Camera::move(Direction direction, float delta_time)
 {
 	switch (direction) {
-	case Direction::FOWARD:	  velocity.z = -speed * delta_time; break;
+	case Direction::FORWARD:  velocity.z = -speed * delta_time; break;
 	case Direction::BACKWARD: velocity.z =  speed * delta_time; break;
 	case Direction::RIGHT:	  velocity.x =  speed * delta_time; break;
 	case Direction::LEFT:	  velocity.x = -speed * delta_time; break;
+	};
+	std::cout << position.z << "\n";
+}
+
+void Camera::stop(Direction direction)
+{
+	switch (direction) {
+	case Direction::FORWARD:  velocity.z = 0; break;
+	case Direction::BACKWARD: velocity.z = 0; break;
+	case Direction::RIGHT:	  velocity.x = 0; break;
+	case Direction::LEFT:	  velocity.x = 0; break;
 	};
 }
 
