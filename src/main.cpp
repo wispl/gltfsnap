@@ -43,6 +43,17 @@ static void mouse_callback(GLFWwindow* window, double x, double y)
 	input::process_axis(DefaultRanges::MOUSE_Y, y_offset);
 }
 
+static void resize_callback(GLFWwindow* window, int width, int height) {
+	static_cast<Renderer*>(glfwGetWindowUserPointer(window))->update_window(width, height);
+};
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	// Gets the last state of the key, good for detecting if it is held since
+	// GLFW_REPEAT is for text input only and not reliable for this usecase.
+	bool pressed_before = glfwGetKey(window, key) == GLFW_PRESS;
+	input::process_button(key, (action != GLFW_RELEASE), pressed_before);
+};
+
 int main(int argc, char** argv)
 {
 	bool running = true;
@@ -150,18 +161,6 @@ int main(int argc, char** argv)
 
 	// Set userdata on the window to the renderer to access it during callbacks
 	glfwSetWindowUserPointer(window, reinterpret_cast<void*>(&renderer));
-
-	auto resize_callback = [](GLFWwindow* window, int width, int height) {
-		static_cast<Renderer*>(glfwGetWindowUserPointer(window))->update_window(width, height);
-	};
-
-	auto key_callback = [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-		// Gets the last state of the key, good for detecting if it is held since
-		// GLFW_REPEAT is for text input only and not reliable for this usecase.
-		bool pressed_before = glfwGetKey(window, key) == GLFW_PRESS;
-		input::process_button(key, (action != GLFW_RELEASE), pressed_before);
-	};
-
 	glfwSetFramebufferSizeCallback(window, resize_callback);
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
