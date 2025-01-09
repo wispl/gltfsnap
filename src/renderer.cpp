@@ -32,8 +32,7 @@ Renderer::Renderer(GLuint program)
 	glCreateBuffers(1, &material_ubo);
 	glNamedBufferStorage(material_ubo, static_cast<GLsizeiptr>(sizeof(Material)), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
-	camera.update_position(glm::vec3{ 0.f, 0.f, 5.0f });
-	camera.update_velocity(glm::vec3(0.0f));
+	camera.set_position(glm::vec3{ 0.f, 0.f, 0.1f });
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -55,6 +54,7 @@ void Renderer::update()
 {
 	// TODO: This is pretty expensive, could optimise later, or just leave it
 	// since updating the scene in this application is pretty rare.
+	camera.update();
 	if (scene_dirty) {
 		std::vector<DrawCommand> commands;
 		std::vector<Vertex> vertices;
