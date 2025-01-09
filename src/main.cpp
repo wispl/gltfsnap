@@ -43,8 +43,6 @@ static void mouse_callback(GLFWwindow* window, double x, double y)
 	input::process_axis(DefaultRanges::MOUSE_Y, y_offset);
 }
 
-static 
-
 int main(int argc, char** argv)
 {
 	bool running = true;
