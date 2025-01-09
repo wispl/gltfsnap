@@ -35,7 +35,6 @@ void Camera::move(Direction direction, float delta_time)
 	case Direction::RIGHT:	  velocity.x =  speed * delta_time; break;
 	case Direction::LEFT:	  velocity.x = -speed * delta_time; break;
 	};
-	std::cout << position.z << "\n";
 }
 
 void Camera::stop(Direction direction)
@@ -62,5 +61,3 @@ void Camera::set_speed(float new_speed)
 void Camera::set_position(glm::vec3 new_pos)
 {
 	position = new_pos;
-}
-
