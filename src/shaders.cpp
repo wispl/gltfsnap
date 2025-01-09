@@ -11,16 +11,16 @@ constexpr std::string_view vert_shader = R"(
     #version 450 core
 
     layout(location = 0) in vec3 position;
-    layout(location = 1) in vec2 texcoord;
+    layout(location = 1) in vec2 texcoord_in;
 
     uniform mat4 model;
     uniform mat4 view_proj;
 
-    out vec2 out_texcoord;
+    out vec2 texcoord;
 
     void main() {
         gl_Position = view_proj * model * vec4(position, 1.0);
-        out_texcoord = texcoord;
+        texcoord = texcoord_in;
     }
 )";
 
@@ -30,7 +30,7 @@ constexpr std::string_view frag_shader = R"(
 	in vec2 texcoord;
 	out vec4 fragcolor;
 
-	layout(location = 0) uniform sampler2D albedoTexture;
+	layout(location = 0) uniform sampler2D albedo_texture;
 	layout(binding = 0, std140) uniform Material {
 		vec4 base_color;
 		float metallic;
@@ -38,9 +38,9 @@ constexpr std::string_view frag_shader = R"(
 	} material;
 
 	void main() {
-		vec4 color = material.base_color;
-		// color *= texture(albedo_texture, texcoord);
-		fragcolor = material.base_color;
+		// vec4 color = material.base_color;
+		vec4 color = texture(albedo_texture, texcoord);
+		fragcolor = color;
 	}
 )";
 
