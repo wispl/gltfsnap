@@ -61,3 +61,4 @@ void Camera::set_speed(float new_speed)
 void Camera::set_position(glm::vec3 new_pos)
 {
 	position = new_pos;
+}
