@@ -10,3 +10,7 @@ struct ActionSets {
 struct DefaultActions {
 	enum Actions { FORWARD, RIGHT, LEFT, BACKWARD, QUIT };
 };
+
+struct DefaultRanges {
+	enum Ranges { MOUSE_X, MOUSE_Y };
+};

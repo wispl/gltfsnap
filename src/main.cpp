@@ -75,6 +75,28 @@ int main(int argc, char** argv)
 			input::Action{ DefaultActions::LEFT,	 GLFW_KEY_A, "Move Left" },
 			input::Action{ DefaultActions::RIGHT, 	 GLFW_KEY_D, "Move Right" },
 			input::Action{ DefaultActions::QUIT, 	 GLFW_KEY_Q, "Quit" }
+		},
+		std::vector{
+			// We can directly get x and y cursor pos in GLFW, so
+			// there really isn't a raw axis we can query for. This
+			// might change for joysticks and controllers so the code
+			// and raw axis input won't always be the same.
+			input::Range{
+				DefaultRanges::MOUSE_X,
+				DefaultRanges::MOUSE_X,
+				0.5f,
+				-1000.0f,
+				1000.0f,
+				"Move cursor horizontally",
+			},
+			input::Range{
+				DefaultRanges::MOUSE_Y,
+				DefaultRanges::MOUSE_Y,
+				0.5f,
+				-1000.0f,
+				1000.0f,
+				"Move cursor vertically",
+			},
 		}
 	);
 	input::add_actionset(main);

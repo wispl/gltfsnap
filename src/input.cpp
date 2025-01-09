@@ -44,9 +44,8 @@ void process_button(uint32_t button, bool pressed, bool held)
 {
 	assert(enabled != nullptr);
 
-	auto action = enabled->action_map.find(button);
-	if (action != enabled->action_map.end()) {
-		auto code = action->second.code;
+	if (auto find = enabled->action_map.find(button); find != enabled->action_map.end()) {
+		auto code = find->second.code;
 		if (pressed) {
 			mapped_data.pressed.insert(code);
 			if (held) {
@@ -56,6 +55,21 @@ void process_button(uint32_t button, bool pressed, bool held)
 			mapped_data.pressed.erase(code);
 			mapped_data.held.erase(code);
 		}
+	}
+}
+
+void process_axis(uint32_t axis, float value)
+{
+	assert(enabled != nullptr);
+
+	if (auto find = enabled->range_map.find(axis); find != enabled->range_map.end()) {
+		auto range = find->second;
+		mapped_data.ranges[axis] = RangeData {
+			.value = value,
+			.sensitivity = range.sensitivity,
+			.min = range.min,
+			.max = range.min,
+		};
 	}
 }
 
