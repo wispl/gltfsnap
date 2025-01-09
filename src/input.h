@@ -136,4 +136,11 @@ void process_button(uint32_t button, bool pressed, bool held);
 void process_axis(uint32_t axis, float value);
 void update(float dt);
 
-} // namespace input
+} // end namespace input
+
+// Helper namespace for range conversion
+namespace input::range {
+
+float normalize(float x, float in_min, float in_max, float out_mix, float out_min);
+
+} // end namespace input::range

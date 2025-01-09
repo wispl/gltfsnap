@@ -65,6 +65,7 @@ int main(int argc, char** argv)
 
 	glfwMakeContextCurrent(window);
 	gladLoadGL(glfwGetProcAddress);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -95,7 +96,7 @@ int main(int argc, char** argv)
 			input::Range{
 				DefaultRanges::MOUSE_X,
 				DefaultRanges::MOUSE_X,
-				0.5f,
+				1.5f,
 				-1000.0f,
 				1000.0f,
 				"Move cursor horizontally",
@@ -103,7 +104,7 @@ int main(int argc, char** argv)
 			input::Range{
 				DefaultRanges::MOUSE_Y,
 				DefaultRanges::MOUSE_Y,
-				0.5f,
+				1.5f,
 				-1000.0f,
 				1000.0f,
 				"Move cursor vertically",
@@ -138,7 +139,12 @@ int main(int argc, char** argv)
 		auto x_range = data.get_range(DefaultRanges::MOUSE_X);
 		auto y_range = data.get_range(DefaultRanges::MOUSE_Y);
 		if (x_range.has_value() and y_range.has_value()) {
-			renderer.camera.rotate((*x_range).value, (*y_range).value);
+			auto x = (*x_range);
+			auto y = (*y_range);
+			auto yaw = input::range::normalize(x.value, x.min, x.max, -1, 1);
+			auto pitch = input::range::normalize(y.value, y.min, y.max, -1, 1);
+
+			renderer.camera.rotate(yaw * x.sensitivity, pitch * y.sensitivity);
 		}
 	});
 

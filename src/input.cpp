@@ -82,6 +82,18 @@ void update(float dt)
 	// Clear pressed actions. Held actions do not get cleared since they
 	// should persist in the next frame.
 	mapped_data.pressed.clear();
+	mapped_data.ranges.clear();
 }
 
-} // namespace input
+
+} // end namespace input
+
+namespace input::range {
+
+float normalize(float x, float in_min, float in_max, float out_min, float out_max)
+{
+	auto factor = (x - in_min) / (in_max - in_min);
+	return (factor * (out_max - out_min)) + out_min;
+}
+
+} // end namespace input::range
