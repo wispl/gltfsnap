@@ -98,14 +98,14 @@ void Renderer::render() const
 
 	// set camera uniforms
 	auto view = camera.view_matrix();
-	// TODO: set these to actual window widths
 	auto proj = glm::perspective(glm::radians(70.0f), (static_cast<float>(width) / height), 10000.f, 0.1f);
 	auto view_proj = proj * view;
 	glUniformMatrix4fv(view_proj_uniform, 1, GL_FALSE, &view_proj[0][0]);
 
 	for (auto& node : curr_scene.nodes) {
 		for (auto& meshnode : node.gltf.meshnodes) {
-			glUniformMatrix4fv(model_uniform, 1, GL_FALSE, &meshnode.transform[0][0]);
+			auto transform = node.transform * meshnode.transform;
+			glUniformMatrix4fv(model_uniform, 1, GL_FALSE, &transform[0][0]);
 			auto& mesh = node.gltf.meshes[meshnode.mesh_idx];
 
 			for (auto& primitive : mesh.primitives) {
