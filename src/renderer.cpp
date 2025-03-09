@@ -98,7 +98,7 @@ void Renderer::render() const
 
 	// set camera uniforms
 	auto view = camera.view_matrix();
-	auto proj = glm::perspective(glm::radians(70.0f), (static_cast<float>(width) / height), 10000.f, 0.1f);
+	auto proj = glm::perspective(glm::radians(70.0f), (static_cast<float>(width) / height), 0.1f, 100.0f);
 	auto view_proj = proj * view;
 	glUniformMatrix4fv(view_proj_uniform, 1, GL_FALSE, &view_proj[0][0]);
 
