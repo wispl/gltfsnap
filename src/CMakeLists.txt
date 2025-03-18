@@ -1,6 +1,8 @@
 target_sources(${PROJECT_NAME}
 	PRIVATE
 		actionset.h
+		buffer.cpp
+		buffer.h
 		gl.c
 		gltf.cpp
 		gltf.h
