@@ -6,6 +6,7 @@
 
 #include <filesystem>
 #include <vector>
+#include <string>
 
 struct Texture {
 	GLuint id;
@@ -63,6 +64,7 @@ struct MeshNode {
 // Contains all information needed to render a GLTF. Meshes depend on materials
 // which depend on textures.
 struct LoadedGLTF {
+	std::string path;
 	std::vector<DrawCommand> commands;
 	std::vector<Vertex> vertices;
 	std::vector<std::uint32_t> indices;

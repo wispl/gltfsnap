@@ -175,6 +175,7 @@ LoadedGLTF load_gltf(std::filesystem::path path)
 		load_texture(loaded_gltf, asset, image);
 	}
 
+	loaded_gltf.path = path;
 	// default material
 	loaded_gltf.materials.push_back(Material{ glm::vec4(1.0f), 1.0f, 1.0f });
 	for (auto& material : asset.materials) {
