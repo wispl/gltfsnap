@@ -46,6 +46,9 @@ struct Primitive {
 	// the command since the order is no longer the same.
 	std::size_t command_idx;
 
+	// These are needed to generate draw commands.
+	std::size_t base_vertex, first_index, index_count;
+
 	// TODO: see if these are neccessary, it might be possible to always
 	// assume drawing triangles and an uint32_t as the index type
 	// GLenum primitive_type;
