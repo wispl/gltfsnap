@@ -25,6 +25,7 @@ struct Header {
 template <typename T>
 class Buffer {
 public:
+	Buffer() {}
 	Buffer(GLuint id) : buffer(id) {
 		element_size = sizeof(T);
 		glNamedBufferStorage(buffer, capacity*element_size, nullptr, GL_DYNAMIC_STORAGE_BIT);

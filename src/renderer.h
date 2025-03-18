@@ -18,6 +18,7 @@ struct MeshAllocation {
 // Handles allocated meshes
 class MeshBuffer {
 public:
+	MeshBuffer() {}
 	MeshBuffer(GLuint vbo, GLuint ebo) : vertices(Buffer<Vertex>(vbo)), indices(Buffer<uint32_t>(ebo)) {}
 	void add_mesh(LoadedGLTF& gltf);
 	void remove_mesh(LoadedGLTF& gltf);
