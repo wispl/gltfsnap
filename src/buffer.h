@@ -9,8 +9,7 @@ struct Header {
 	std::size_t start;
 	std::size_t size;
 
-	bool operator==(const Header& other)
-	{
+	bool operator==(const Header& other) {
 		return (start == other.start) && (size == other.size);
 	}
 };
