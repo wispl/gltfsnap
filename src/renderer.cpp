@@ -6,6 +6,8 @@
 #include <glm/vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <algorithm>
+
 template <typename T>
 static void merge(std::vector<T>& a, std::vector<T>& b) {
 	a.reserve(a.size() + b.size());
@@ -58,6 +60,11 @@ Renderer::Renderer(GLuint program)
 
 	glBindVertexArray(vao);
 
+	GLuint vbo, ibo;
+	glCreateBuffers(1, &vbo);
+	glCreateBuffers(1, &ibo);
+	meshbuffer = MeshBuffer(vbo, ibo);
+
 	model_uniform = glGetUniformLocation(program, "model");
 	view_proj_uniform = glGetUniformLocation(program, "view_proj");
 	glCreateBuffers(1, &material_ubo);
@@ -72,6 +79,20 @@ void Renderer::update_scene(Scene& scene)
 {
 	next_scene = std::move(scene);
 	scene_dirty = true;
+}
+
+void Renderer::add_node(Node node)
+{
+	scene_dirty = true;
+	curr_scene.nodes.push_back(node);
+	meshbuffer.add_mesh(node.gltf);
+}
+
+void Renderer::remove_node(Node node)
+{
+	scene_dirty = true;
+	curr_scene.nodes.erase(std::find(curr_scene.nodes.begin(), curr_scene.nodes.end(), node));
+	meshbuffer.remove_mesh(node.gltf);
 }
 
 void Renderer::update_window(int new_width, int new_height)

@@ -35,7 +35,11 @@ public:
 	Camera camera;
 
 	Renderer(GLuint program);
+	// TODO: move these into scene itself, and maybe use move semantics?
 	void update_scene(Scene& scene);
+	void add_node(Node node);
+	void remove_node(Node node);
+
 	void update_window(int new_width, int new_height);
 	void update();
 	void render() const;
@@ -45,6 +49,7 @@ private:
 	int width, height;
 
 	// gl buffers
+	MeshBuffer meshbuffer;
 	GLuint vertex_buffer, index_buffer, command_buffer;
 	GLuint vao;
 
