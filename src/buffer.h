@@ -1,8 +1,11 @@
 #pragma once
 
+#include "gltf.h"
+
 #include <glad/gl.h>
 
 #include <algorithm>
+#include <unordered_map>
 #include <vector>
 
 struct Header {
@@ -120,4 +123,25 @@ private:
 
 	std::vector<Header> used_list;
 	std::vector<Header> free_list;
+};
+
+struct MeshAllocation {
+	MeshAllocation() {}
+	MeshAllocation(Header vheader, Header iheader) : vertex_header(vheader), index_header(iheader) {}
+	Header vertex_header, index_header;
+};
+
+// Handles allocated meshes
+class MeshBuffer {
+public:
+	MeshBuffer() {}
+	MeshBuffer(GLuint vbo, GLuint ebo) : vertices(Buffer<Vertex>(vbo)), indices(Buffer<uint32_t>(ebo)) {}
+	void add_mesh(LoadedGLTF& gltf);
+	void remove_mesh(LoadedGLTF& gltf);
+	MeshAllocation get_header(LoadedGLTF& gltf);
+private:
+	Buffer<Vertex> vertices;
+	Buffer<uint32_t> indices;
+
+	std::unordered_map<std::string, MeshAllocation> loaded_meshes;
 };
