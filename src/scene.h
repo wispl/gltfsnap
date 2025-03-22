@@ -3,6 +3,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 
+#include <memory>
 #include <vector>
 
 // Forward declare
@@ -32,10 +33,22 @@ private:
 };
 
 struct Node {
-	LoadedGLTF& gltf;
+public:
+	uint32_t id;
+	std::shared_ptr<LoadedGLTF> gltf;
 	glm::mat4 transform;
+
+	Node(std::shared_ptr<LoadedGLTF> gltf) : gltf(gltf), id(num_entities++) {};
+	Node(std::shared_ptr<LoadedGLTF> gltf, glm::mat4 transform) : gltf(gltf), transform(transform), id(num_entities++) {};
+	bool operator==(const Node& other) {
+		return (id == other.id);
+	}
+private:
+	// TODO: we might need a better way to generate uuids
+	static uint32_t num_entities;
 };
 
 struct Scene {
+	// TODO: buffer changes?
 	std::vector<Node> nodes;
 };

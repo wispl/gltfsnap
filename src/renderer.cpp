@@ -85,14 +85,14 @@ void Renderer::add_node(Node node)
 {
 	scene_dirty = true;
 	curr_scene.nodes.push_back(node);
-	meshbuffer.add_mesh(node.gltf);
+	meshbuffer.add_mesh(*node.gltf);
 }
 
 void Renderer::remove_node(Node node)
 {
 	scene_dirty = true;
 	curr_scene.nodes.erase(std::find(curr_scene.nodes.begin(), curr_scene.nodes.end(), node));
-	meshbuffer.remove_mesh(node.gltf);
+	meshbuffer.remove_mesh(*node.gltf);
 }
 
 void Renderer::update_window(int new_width, int new_height)
@@ -114,9 +114,9 @@ void Renderer::update()
 
 		curr_scene = std::move(next_scene);
 		for (const auto& node : curr_scene.nodes) {
-			merge(commands, node.gltf.commands);
-			merge(vertices, node.gltf.vertices);
-			merge(indices, node.gltf.indices);
+			merge(commands, (*node.gltf).commands);
+			merge(vertices, (*node.gltf).vertices);
+			merge(indices, (*node.gltf).indices);
 		}
 		// TODO: check if this is optimal, or use glBufferData instead
 		if (vertex_buffer != GL_NONE) {
@@ -155,14 +155,14 @@ void Renderer::render() const
 	glUniformMatrix4fv(view_proj_uniform, 1, GL_FALSE, &view_proj[0][0]);
 
 	for (auto& node : curr_scene.nodes) {
-		for (auto& meshnode : node.gltf.meshnodes) {
+		for (auto& meshnode : (*node.gltf).meshnodes) {
 			auto transform = node.transform * meshnode.transform;
 			glUniformMatrix4fv(model_uniform, 1, GL_FALSE, &transform[0][0]);
-			auto& mesh = node.gltf.meshes[meshnode.mesh_idx];
+			auto& mesh = (*node.gltf).meshes[meshnode.mesh_idx];
 
 			for (auto& primitive : mesh.primitives) {
-				auto& material = node.gltf.materials[primitive.material_idx];
-				auto& texture = node.gltf.textures[primitive.texture_idx];
+				auto& material = (*node.gltf).materials[primitive.material_idx];
+				auto& texture = (*node.gltf).textures[primitive.texture_idx];
 
 				glBindTextureUnit(0, texture.id);
 				glNamedBufferSubData(material_ubo, 0, sizeof(Material), reinterpret_cast<const void*>(&material));

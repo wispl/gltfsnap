@@ -8,6 +8,8 @@
 
 // Most of the code is from https://vkguide.dev/docs/new_chapter_5/interactive_camera/
 
+uint32_t Node::num_entities = 0;
+
 glm::mat4 Camera::view_matrix() const
 {
 	auto translation = glm::translate(glm::mat4(1.0f), position);
