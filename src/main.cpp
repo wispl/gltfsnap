@@ -10,13 +10,16 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/mat4x4.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/transform.hpp>
 
-// #include <stb_image_write.h>
+#include <stb_image_write.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <iostream>
+#include <memory>
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -83,8 +86,10 @@ int main(int argc, char** argv)
 	glDebugMessageCallback(opengl_error_callback, nullptr);
 
 	// add "./" in front of the path
-	auto file = std::string_view { + argv[1] };
-	auto gltf = load_gltf(file);
+	auto file = std::string_view { argv[1] };
+	auto gltf = std::make_shared<LoadedGLTF>(load_gltf(file));
+	auto file2 = std::string_view { argv[2] };
+	auto gltf2 = std::make_shared<LoadedGLTF>(load_gltf(file2));
 
 	auto program = compile_program();
 	auto renderer = Renderer(*program);
@@ -166,10 +171,15 @@ int main(int argc, char** argv)
 	glfwSetCursorPosCallback(window, mouse_callback);
 
 	auto scene = Scene();
-	Node node = { .gltf = gltf, .transform = glm::mat4(1.0f) };
+	glm::mat4 model = glm::mat4(1);
+	glm::vec3 scale = glm::vec3(0.001f, 0.001f, 0.001f);
+	Node node = Node(gltf, glm::scale(model, scale));
+	Node node2 = Node(gltf2, glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 5.0f, 5.0f)));
 	scene.nodes.push_back(node);
+	scene.nodes.push_back(node2);
 
 	renderer.update_scene(scene);
+	// renderer.camera.set_position(glm::vec3(0.0f, -400.0f, 0.0f));
 
 	// TODO: could be better
 	float last_frame, curr_frame, delta_time = 0;
@@ -184,6 +194,13 @@ int main(int argc, char** argv)
 		renderer.loop();
 		glfwSwapBuffers(window);
 	}
+
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+	char* buffer = (char*) calloc(4, width * height);
+	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	// Write image Y-flipped because OpenGL
+	stbi_write_png("offscreen.png", width, height, 4, buffer + (width * 4 * (height - 1)), -width * 4);
 
 	// glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	// Write image Y-flipped because OpenGL
