@@ -156,3 +156,34 @@ private:
 
 	std::unordered_map<std::string, MeshAllocation> loaded_meshes;
 };
+
+/// Stores DrawCommands to be uploaded to the GPU. This does not internally use
+/// a Buffer because this must map up with nodes in Scene. In other words,
+/// 	node 1, prim 1 will have command at 1
+/// 	node 1, prim 2 will have command at 2
+/// 	node 1, prim 3 will have command at 3
+/// 	node 2, prim 1 will have command at 4
+/// 	node 2, prim 2 will have command at 5
+/// And so on. This keeps the rendering simple and negate the need for a
+/// mapping of primitive to command, which would add more coupling between the
+/// data and rendering code. In most cases, command buffers are regenerated
+/// each frame rather than reused. Before drawing, upload_commands() must be
+/// called.
+class CommandBuffer {
+public:
+	CommandBuffer() {}
+	CommandBuffer(GLuint id) : buffer(id) {
+		commands.reserve(256);
+		glNamedBufferStorage(buffer, 256*sizeof(DrawCommand), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	}
+	~CommandBuffer() { glDeleteBuffers(1, &buffer); }
+
+	void record_command(DrawCommand command);
+	void delete_commands(std::size_t start, std::size_t end);
+	void clear_commands(std::size_t index);
+	void upload_commands();
+private:
+	std::vector<DrawCommand> commands;
+	size_t resized = false;
+	GLuint buffer;
+};

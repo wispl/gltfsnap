@@ -30,3 +30,33 @@ MeshAllocation MeshBuffer::get_header(LoadedGLTF& gltf)
 	return loaded_meshes[gltf.path];
 }
 
+
+void CommandBuffer::record_command(DrawCommand command)
+{
+	if (commands.capacity() == commands.size()) {
+		resized = true;
+	}
+	commands.push_back(command);
+}
+
+void CommandBuffer::delete_commands(std::size_t start, std::size_t end)
+{
+	commands.erase(commands.begin() + start, commands.begin() + start + end);
+}
+
+void CommandBuffer::clear_commands(std::size_t index)
+{
+	commands.clear();
+}
+
+void CommandBuffer::upload_commands()
+{
+	if (resized) {
+		GLuint resized;
+		glCreateBuffers(1, &resized);
+		glNamedBufferStorage(resized, commands.capacity()*sizeof(DrawCommand), commands.data(), GL_DYNAMIC_STORAGE_BIT);
+		glDeleteBuffers(1, &buffer);
+		buffer = resized;
+	}
+	glNamedBufferSubData(buffer, 0, commands.size() * sizeof(DrawCommand), commands.data());
+}
