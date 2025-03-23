@@ -197,6 +197,6 @@ public:
 	void upload_commands();
 private:
 	std::vector<DrawCommand> commands;
-	size_t resized = false;
+	size_t needs_resize = false;
 	GLuint buffer;
 };

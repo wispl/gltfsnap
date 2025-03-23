@@ -57,7 +57,7 @@ void CommandBuffer::delete_buffer()
 void CommandBuffer::record_commands(std::vector<DrawCommand> new_commands)
 {
 	if (commands.capacity() < commands.size() + new_commands.size()) {
-		resized = true;
+		needs_resize = true;
 	}
 	commands.insert(commands.end(),
 			std::make_move_iterator(new_commands.begin()),
@@ -76,12 +76,13 @@ void CommandBuffer::clear_commands()
 
 void CommandBuffer::upload_commands()
 {
-	if (resized) {
+	if (needs_resize) {
 		GLuint resized;
 		glCreateBuffers(1, &resized);
-		glNamedBufferStorage(resized, commands.capacity()*sizeof(DrawCommand), commands.data(), GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(resized, commands.capacity()*sizeof(DrawCommand), nullptr, GL_DYNAMIC_STORAGE_BIT);
 		glDeleteBuffers(1, &buffer);
 		buffer = resized;
+		needs_resize = false;
 	}
 	glNamedBufferSubData(buffer, 0, commands.size() * sizeof(DrawCommand), commands.data());
 }
