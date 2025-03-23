@@ -27,6 +27,7 @@ private:
 
 	// gl buffers
 	MeshBuffer meshbuffer;
+	CommandBuffer commandbuffer;
 	GLuint vertex_buffer, index_buffer, command_buffer;
 	GLuint vao;
 

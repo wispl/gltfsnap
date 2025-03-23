@@ -30,10 +30,10 @@ Renderer::Renderer(GLuint program)
 
 	glBindVertexArray(vao);
 
-	GLuint vbo, ibo;
-	glCreateBuffers(1, &vbo);
-	glCreateBuffers(1, &ibo);
-	meshbuffer = MeshBuffer(vbo, ibo);
+	GLuint buffers[3];
+	glCreateBuffers(3, buffers);
+	meshbuffer = MeshBuffer(buffers[0], buffers[1]);
+	commandbuffer = CommandBuffer(buffers[2]);
 
 	model_uniform = glGetUniformLocation(program, "model");
 	view_proj_uniform = glGetUniformLocation(program, "view_proj");
