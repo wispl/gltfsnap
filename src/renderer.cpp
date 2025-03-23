@@ -102,6 +102,7 @@ void Renderer::update()
 			}
 		}
 		command_buffer.record_commands(commands);
+		command_buffer.upload_commands();
 		scene_dirty = false;
 	}
 }
@@ -124,7 +125,6 @@ void Renderer::render()
 	auto view_proj = proj * view;
 	glUniformMatrix4fv(view_proj_uniform, 1, GL_FALSE, &view_proj[0][0]);
 
-	command_buffer.upload_commands();
 	for (auto& node : scene.nodes) {
 		auto gltf = *node.gltf;
 		for (auto& meshnode : gltf.meshnodes) {
