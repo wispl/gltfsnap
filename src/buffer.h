@@ -38,13 +38,11 @@ public:
 	Buffer() {}
 	Buffer(GLuint id) : buffer(id) {
 		element_size = sizeof(T);
-		glNamedBufferStorage(buffer, capacity*element_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(id, capacity*element_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
 	}
-	~Buffer() { glDeleteBuffers(1, &buffer); }
 
-	GLuint id() const {
-		return buffer;
-	}
+	GLuint id() const { return buffer; }
+	void delete_buffer() { glDeleteBuffers(1, &buffer); }
 
 	Header allocate(size_t data_size) {
 		// Try using a free sector
@@ -150,6 +148,7 @@ public:
 	MeshBuffer() {}
 	MeshBuffer(GLuint vbo, GLuint ebo) : vertices(Buffer<Vertex>(vbo)), indices(Buffer<uint32_t>(ebo)) {}
 	void bind_buffer(GLuint vao);
+	void delete_buffer();
 	void add_mesh(LoadedGLTF& gltf);
 	void remove_mesh(LoadedGLTF& gltf);
 	MeshAllocation get_header(LoadedGLTF& gltf);
@@ -188,9 +187,9 @@ public:
 		commands.reserve(256);
 		glNamedBufferStorage(buffer, 256*sizeof(DrawCommand), nullptr, GL_DYNAMIC_STORAGE_BIT);
 	}
-	~CommandBuffer() { glDeleteBuffers(1, &buffer); }
 
 	void bind_buffer();
+	void delete_buffer();
 	// `commands` will be in an intdeterminate state and unusable after this.
 	void record_commands(std::vector<DrawCommand> new_commands);
 	void delete_commands(std::size_t start, std::size_t end);
