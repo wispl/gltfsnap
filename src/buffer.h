@@ -40,10 +40,7 @@ public:
 		element_size = sizeof(T);
 		glNamedBufferStorage(buffer, capacity*element_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
 	}
-
-	~Buffer() {
-		glDeleteBuffers(1, &buffer);
-	}
+	~Buffer() { glDeleteBuffers(1, &buffer); }
 
 	Header allocate(size_t data_size) {
 		// Try using a free sector
