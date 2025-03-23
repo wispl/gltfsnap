@@ -89,6 +89,7 @@ static bool load_mesh(LoadedGLTF& gltf, fastgltf::Asset& asset, fastgltf::Mesh& 
 		size_t vertices_start = gltf.vertices.size();
 		auto* pos = it.findAttribute("POSITION");
 		auto& pos_accessor = asset.accessors[pos->accessorIndex];
+		gltf.vertices.reserve(vertices_start + pos_accessor.count);
 		fastgltf::iterateAccessor<glm::vec3>(asset, pos_accessor, [&](glm::vec3 pos) {
 			gltf.vertices.push_back(Vertex{ pos, glm::vec2() });
 		});
@@ -142,6 +143,7 @@ static bool load_mesh(LoadedGLTF& gltf, fastgltf::Asset& asset, fastgltf::Mesh& 
 		};
 		gltf.commands.push_back(cmd);
 
+		gltf.indices.reserve(gltf.indices.size() + index_accessor.count);
 		fastgltf::iterateAccessor<std::uint32_t>(asset, index_accessor, [&](std::uint32_t idx) {
 			gltf.indices.push_back(idx);
 		});
