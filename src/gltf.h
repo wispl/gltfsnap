@@ -64,7 +64,7 @@ struct LoadedGLTF {
 	std::vector<Texture> textures;
 	std::vector<Material> materials;
 	std::vector<Mesh> meshes;
-	size_t primitive_count;
+	size_t primitive_count {0};
 
 	std::vector<MeshNode> meshnodes;
 };
