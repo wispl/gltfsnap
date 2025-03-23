@@ -130,7 +130,8 @@ private:
 	std::vector<Header> free_list;
 };
 
-// TODO: the header stores data in terms of lengths, but OpenGl 
+/// A MeshAllocation stores where the indices and vertices of a mesh is located
+/// in the buffer.
 struct MeshAllocation {
 	MeshAllocation() {}
 	MeshAllocation(Header vheader, Header iheader) : vertex_header(vheader), index_header(iheader) {}
