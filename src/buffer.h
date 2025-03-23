@@ -179,7 +179,7 @@ public:
 	// `commands` will be in an intdeterminate state and unusable after this.
 	void record_commands(std::vector<DrawCommand> new_commands);
 	void delete_commands(std::size_t start, std::size_t end);
-	void clear_commands(std::size_t index);
+	void clear_commands();
 	void upload_commands();
 private:
 	std::vector<DrawCommand> commands;

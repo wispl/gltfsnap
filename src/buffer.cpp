@@ -48,7 +48,7 @@ void CommandBuffer::delete_commands(std::size_t start, std::size_t end)
 	commands.erase(commands.begin() + start, commands.begin() + start + end);
 }
 
-void CommandBuffer::clear_commands(std::size_t index)
+void CommandBuffer::clear_commands()
 {
 	commands.clear();
 }
