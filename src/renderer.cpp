@@ -108,7 +108,6 @@ void Renderer::update()
 
 void Renderer::render()
 {
-
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -128,14 +127,15 @@ void Renderer::render()
 
 	commandbuffer.upload_commands();
 	for (auto& node : curr_scene.nodes) {
-		for (auto& meshnode : (*node.gltf).meshnodes) {
+		auto gltf = *node.gltf;
+		for (auto& meshnode : gltf.meshnodes) {
 			auto transform = node.transform * meshnode.transform;
 			glUniformMatrix4fv(model_uniform, 1, GL_FALSE, &transform[0][0]);
-			auto& mesh = (*node.gltf).meshes[meshnode.mesh_idx];
+			auto& mesh = gltf.meshes[meshnode.mesh_idx];
 
 			for (auto& primitive : mesh.primitives) {
-				auto& material = (*node.gltf).materials[primitive.material_idx];
-				auto& texture = (*node.gltf).textures[primitive.texture_idx];
+				auto& material = gltf.materials[primitive.material_idx];
+				auto& texture = gltf.textures[primitive.texture_idx];
 
 				glBindTextureUnit(0, texture.id);
 				glNamedBufferSubData(material_ubo, 0, sizeof(Material), reinterpret_cast<const void*>(&material));
