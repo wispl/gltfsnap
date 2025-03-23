@@ -1,5 +1,7 @@
 #include "buffer.h"
 
+#include <iterator>
+
 void MeshBuffer::add_mesh(LoadedGLTF& gltf)
 {
 	if (loaded_meshes.find(gltf.path) == loaded_meshes.end()) {
@@ -31,12 +33,14 @@ MeshAllocation MeshBuffer::get_header(LoadedGLTF& gltf)
 }
 
 
-void CommandBuffer::record_command(DrawCommand command)
+void CommandBuffer::record_commands(std::vector<DrawCommand> new_commands)
 {
-	if (commands.capacity() == commands.size()) {
+	if (commands.capacity() < commands.size() + new_commands.size()) {
 		resized = true;
 	}
-	commands.push_back(command);
+	commands.insert(commands.end(),
+			std::make_move_iterator(new_commands.begin()),
+			std::make_move_iterator(new_commands.end()));
 }
 
 void CommandBuffer::delete_commands(std::size_t start, std::size_t end)
