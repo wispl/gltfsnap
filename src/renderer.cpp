@@ -125,6 +125,7 @@ void Renderer::render()
 	auto view_proj = proj * view;
 	glUniformMatrix4fv(view_proj_uniform, 1, GL_FALSE, &view_proj[0][0]);
 
+	size_t idx = 0;
 	for (auto& node : scene.nodes) {
 		auto gltf = *node.gltf;
 		for (auto& meshnode : gltf.meshnodes) {
@@ -139,9 +140,12 @@ void Renderer::render()
 				glBindTextureUnit(0, texture.id);
 				glNamedBufferSubData(material_ubo, 0, sizeof(Material), reinterpret_cast<const void*>(&material));
 
-				glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, reinterpret_cast<const void*>(sizeof(DrawCommand) * primitive.command_idx));
+				auto command_idx = sizeof(DrawCommand) * (primitive.command_idx + idx);
+				glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, reinterpret_cast<const void*>(command_idx));
 			}
 		}
+		// Increment by the total commands of the previous mesh
+		idx += gltf.primitive_count;
 	}
 }
 
