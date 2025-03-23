@@ -39,23 +39,23 @@ Renderer::Renderer(GLuint program)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void Renderer::update_scene(Scene& scene)
+void Renderer::update_scene(Scene scene)
 {
-	next_scene = std::move(scene);
+	scene = std::move(scene);
 	scene_dirty = true;
 }
 
 void Renderer::add_node(Node node)
 {
 	scene_dirty = true;
-	curr_scene.nodes.push_back(node);
+	scene.nodes.push_back(node);
 	meshbuffer.add_mesh(*node.gltf);
 }
 
 void Renderer::remove_node(Node node)
 {
 	scene_dirty = true;
-	curr_scene.nodes.erase(std::find(curr_scene.nodes.begin(), curr_scene.nodes.end(), node));
+	scene.nodes.erase(std::find(scene.nodes.begin(), scene.nodes.end(), node));
 	meshbuffer.remove_mesh(*node.gltf);
 }
 
@@ -83,7 +83,7 @@ void Renderer::update()
 	if (scene_dirty) {
 		commandbuffer.clear_commands();
 		std::vector<DrawCommand> commands;
-		for (const auto& node : curr_scene.nodes) {
+		for (const auto& node : scene.nodes) {
 			auto& gltf = (*node.gltf);
 			MeshAllocation allocation = meshbuffer.get_header(gltf);
 			commands.reserve(commands.size() + gltf.primitive_count);
@@ -112,9 +112,8 @@ void Renderer::render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// bind global buffers
-	glVertexArrayVertexBuffer(vao, 0, vertex_buffer, 0, sizeof(Vertex));
-	glVertexArrayElementBuffer(vao, index_buffer);
-	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, command_buffer);
+	meshbuffer.bind_buffer(vao);
+	commandbuffer.bind_buffer();
 
 	// bind material uniform buffer
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, material_ubo);
@@ -126,7 +125,7 @@ void Renderer::render()
 	glUniformMatrix4fv(view_proj_uniform, 1, GL_FALSE, &view_proj[0][0]);
 
 	commandbuffer.upload_commands();
-	for (auto& node : curr_scene.nodes) {
+	for (auto& node : scene.nodes) {
 		auto gltf = *node.gltf;
 		for (auto& meshnode : gltf.meshnodes) {
 			auto transform = node.transform * meshnode.transform;

@@ -42,6 +42,10 @@ public:
 	}
 	~Buffer() { glDeleteBuffers(1, &buffer); }
 
+	GLuint id() const {
+		return buffer;
+	}
+
 	Header allocate(size_t data_size) {
 		// Try using a free sector
 		auto it = std::remove_if(free_list.begin(), free_list.end(), [data_size](Header h) { return h.size < data_size; });
@@ -145,6 +149,7 @@ class MeshBuffer {
 public:
 	MeshBuffer() {}
 	MeshBuffer(GLuint vbo, GLuint ebo) : vertices(Buffer<Vertex>(vbo)), indices(Buffer<uint32_t>(ebo)) {}
+	void bind_buffer(GLuint vao);
 	void add_mesh(LoadedGLTF& gltf);
 	void remove_mesh(LoadedGLTF& gltf);
 	MeshAllocation get_header(LoadedGLTF& gltf);
@@ -185,6 +190,7 @@ public:
 	}
 	~CommandBuffer() { glDeleteBuffers(1, &buffer); }
 
+	void bind_buffer();
 	// `commands` will be in an intdeterminate state and unusable after this.
 	void record_commands(std::vector<DrawCommand> new_commands);
 	void delete_commands(std::size_t start, std::size_t end);

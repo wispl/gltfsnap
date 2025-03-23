@@ -13,7 +13,7 @@ public:
 
 	Renderer(GLuint program);
 	// TODO: move these into scene itself, and maybe use move semantics?
-	void update_scene(Scene& scene);
+	void update_scene(Scene scene);
 	void add_node(Node node);
 	void remove_node(Node node);
 
@@ -28,13 +28,11 @@ private:
 	// gl buffers
 	MeshBuffer meshbuffer;
 	CommandBuffer commandbuffer;
-	GLuint vertex_buffer, index_buffer, command_buffer;
 	GLuint vao;
 
 	// scene data
 	bool scene_dirty = false;
-	Scene curr_scene;
-	Scene next_scene;
+	Scene scene;
 
 	// uniforms and ubo
 	GLuint model_uniform;

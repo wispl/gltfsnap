@@ -2,6 +2,12 @@
 
 #include <iterator>
 
+void MeshBuffer::bind_buffer(GLuint vao)
+{
+	glVertexArrayVertexBuffer(vao, 0, vertices.id(), 0, sizeof(Vertex));
+	glVertexArrayElementBuffer(vao, indices.id());
+}
+
 void MeshBuffer::add_mesh(LoadedGLTF& gltf)
 {
 	if (loaded_meshes.find(gltf.path) == loaded_meshes.end()) {
@@ -32,6 +38,10 @@ MeshAllocation MeshBuffer::get_header(LoadedGLTF& gltf)
 	return loaded_meshes[gltf.path];
 }
 
+void CommandBuffer::bind_buffer()
+{
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, buffer);
+}
 
 void CommandBuffer::record_commands(std::vector<DrawCommand> new_commands)
 {
