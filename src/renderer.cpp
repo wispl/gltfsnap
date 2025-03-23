@@ -72,15 +72,23 @@ void Renderer::update()
 	// since updating the scene in this application is pretty rare.
 	camera.update();
 
+	// Generate commands when the scene changes. This seems wasteful but
+	// this is generally parallelized and the alternative of tracking when
+	// a node is added or removed is not the best either.
+	//
+	// A command is generated for each primitive, in the future it might
+	// make sense to generate commands for each meshnode in gltf so we
+	// can just submit the whole command buffer for drawing instead of
+	// indexing it by a command_idx like we are doing now.
 	if (scene_dirty) {
 		commandbuffer.clear_commands();
 		std::vector<DrawCommand> commands;
 		for (const auto& node : curr_scene.nodes) {
 			auto& gltf = (*node.gltf);
 			MeshAllocation allocation = meshbuffer.get_header(gltf);
+			commands.reserve(commands.size() + gltf.primitive_count);
 
 			for (const auto& mesh : gltf.meshes) {
-				commands.reserve(commands.size() + mesh.primitives.size());
 				for (const auto prim : mesh.primitives) {
 					DrawCommand cmd = {
 						.count = prim.index_count,

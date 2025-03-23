@@ -130,25 +130,20 @@ static bool load_mesh(LoadedGLTF& gltf, fastgltf::Asset& asset, fastgltf::Mesh& 
 
 		// indices
 		auto& index_accessor = asset.accessors[it.indicesAccessor.value()];
+		gltf.indices.reserve(gltf.indices.size() + index_accessor.count);
+
+		// A DrawCommand is generated for each primitive.
+		primitive.command_idx = gltf.primitive_count;
 		primitive.base_vertex = static_cast<std::size_t>(index_accessor.count);
 		primitive.first_index = static_cast<std::size_t>(gltf.indices.size());
 		primitive.index_count = static_cast<std::size_t>(vertices_start);
-		primitive.command_idx = gltf.commands.size();
-		DrawCommand cmd = {
-			.count = static_cast<std::uint32_t>(index_accessor.count),
-			.instance_count = 1,
-			.first_index = static_cast<std::uint32_t>(gltf.indices.size()),
-			.base_vertex = static_cast<std::uint32_t>(vertices_start),
-			.base_instance = 0
-		};
-		gltf.commands.push_back(cmd);
 
-		gltf.indices.reserve(gltf.indices.size() + index_accessor.count);
 		fastgltf::iterateAccessor<std::uint32_t>(asset, index_accessor, [&](std::uint32_t idx) {
 			gltf.indices.push_back(idx);
 		});
 
 		mesh.primitives.push_back(primitive);
+		++gltf.primitive_count;
 	}
 
 	gltf.meshes.push_back(mesh);

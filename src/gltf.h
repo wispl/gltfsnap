@@ -68,13 +68,13 @@ struct MeshNode {
 // which depend on textures.
 struct LoadedGLTF {
 	std::string path;
-	std::vector<DrawCommand> commands;
 	std::vector<Vertex> vertices;
 	std::vector<std::uint32_t> indices;
 
 	std::vector<Texture> textures;
 	std::vector<Material> materials;
 	std::vector<Mesh> meshes;
+	size_t primitive_count;
 
 	std::vector<MeshNode> meshnodes;
 };
