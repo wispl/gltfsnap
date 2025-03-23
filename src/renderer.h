@@ -26,9 +26,9 @@ private:
 	int width, height;
 
 	// gl buffers
-	MeshBuffer meshbuffer;
-	CommandBuffer commandbuffer;
 	GLuint vao;
+	MeshBuffer mesh_buffer;
+	CommandBuffer command_buffer;
 
 	// scene data
 	bool scene_dirty = false;

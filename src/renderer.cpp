@@ -26,8 +26,8 @@ Renderer::Renderer(GLuint program)
 
 	GLuint buffers[3];
 	glCreateBuffers(3, buffers);
-	meshbuffer = MeshBuffer(buffers[0], buffers[1]);
-	commandbuffer = CommandBuffer(buffers[2]);
+	mesh_buffer = MeshBuffer(buffers[0], buffers[1]);
+	command_buffer = CommandBuffer(buffers[2]);
 
 	model_uniform = glGetUniformLocation(program, "model");
 	view_proj_uniform = glGetUniformLocation(program, "view_proj");
@@ -49,14 +49,14 @@ void Renderer::add_node(Node node)
 {
 	scene_dirty = true;
 	scene.nodes.push_back(node);
-	meshbuffer.add_mesh(*node.gltf);
+	mesh_buffer.add_mesh(*node.gltf);
 }
 
 void Renderer::remove_node(Node node)
 {
 	scene_dirty = true;
 	scene.nodes.erase(std::find(scene.nodes.begin(), scene.nodes.end(), node));
-	meshbuffer.remove_mesh(*node.gltf);
+	mesh_buffer.remove_mesh(*node.gltf);
 }
 
 void Renderer::update_window(int new_width, int new_height)
@@ -81,11 +81,11 @@ void Renderer::update()
 	// can just submit the whole command buffer for drawing instead of
 	// indexing it by a command_idx like we are doing now.
 	if (scene_dirty) {
-		commandbuffer.clear_commands();
+		command_buffer.clear_commands();
 		std::vector<DrawCommand> commands;
 		for (const auto& node : scene.nodes) {
 			auto& gltf = (*node.gltf);
-			MeshAllocation allocation = meshbuffer.get_header(gltf);
+			MeshAllocation allocation = mesh_buffer.get_header(gltf);
 			commands.reserve(commands.size() + gltf.primitive_count);
 
 			for (const auto& mesh : gltf.meshes) {
@@ -101,7 +101,7 @@ void Renderer::update()
 				}
 			}
 		}
-		commandbuffer.record_commands(commands);
+		command_buffer.record_commands(commands);
 		scene_dirty = false;
 	}
 }
@@ -112,8 +112,8 @@ void Renderer::render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// bind global buffers
-	meshbuffer.bind_buffer(vao);
-	commandbuffer.bind_buffer();
+	mesh_buffer.bind_buffer(vao);
+	command_buffer.bind_buffer();
 
 	// bind material uniform buffer
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, material_ubo);
@@ -124,7 +124,7 @@ void Renderer::render()
 	auto view_proj = proj * view;
 	glUniformMatrix4fv(view_proj_uniform, 1, GL_FALSE, &view_proj[0][0]);
 
-	commandbuffer.upload_commands();
+	command_buffer.upload_commands();
 	for (auto& node : scene.nodes) {
 		auto gltf = *node.gltf;
 		for (auto& meshnode : gltf.meshnodes) {
