@@ -83,6 +83,7 @@ public:
 		}
 
 		auto used_header = Header { .start = size, .size = data_size };
+		size += data_size;
 		used_list.push_back(used_header);
 
 		return used_header;
@@ -107,6 +108,7 @@ public:
 					--index;
 				}
 			}
+			// TODO: handle this better by decrementing size instead
 			if (index < size)  {
 				auto next = free_list[index];
 				if (next.start == header.start + header.size) {
