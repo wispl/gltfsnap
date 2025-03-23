@@ -8,12 +8,6 @@
 
 #include <algorithm>
 
-template <typename T>
-static void merge(std::vector<T>& a, std::vector<T>& b) {
-	a.reserve(a.size() + b.size());
-	a.insert(a.end(), b.begin(), b.end());
-}
-
 Renderer::Renderer(GLuint program)
 {
 	glUseProgram(program);
@@ -77,36 +71,36 @@ void Renderer::update()
 	// TODO: This is pretty expensive, could optimise later, or just leave it
 	// since updating the scene in this application is pretty rare.
 	camera.update();
+
 	if (scene_dirty) {
+		commandbuffer.clear_commands();
 		std::vector<DrawCommand> commands;
-		std::vector<Vertex> vertices;
-		std::vector<std::uint32_t> indices;
-
-		curr_scene = std::move(next_scene);
 		for (const auto& node : curr_scene.nodes) {
-			merge(commands, (*node.gltf).commands);
-			merge(vertices, (*node.gltf).vertices);
-			merge(indices, (*node.gltf).indices);
-		}
-		// TODO: check if this is optimal, or use glBufferData instead
-		if (vertex_buffer != GL_NONE) {
-			glDeleteBuffers(1, &vertex_buffer);
-			glDeleteBuffers(1, &index_buffer);
-			glDeleteBuffers(1, &command_buffer);
-		}
-		glCreateBuffers(1, &vertex_buffer);
-		glCreateBuffers(1, &index_buffer);
-		glCreateBuffers(1, &command_buffer);
+			auto& gltf = (*node.gltf);
+			MeshAllocation allocation = meshbuffer.get_header(gltf);
 
-		glNamedBufferStorage(vertex_buffer, sizeof(Vertex) * vertices.size(), vertices.data(), GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferStorage(index_buffer, sizeof(std::uint32_t) * indices.size(), indices.data(), GL_DYNAMIC_STORAGE_BIT);
-		glNamedBufferStorage(command_buffer, sizeof(DrawCommand) * commands.size(), commands.data(), GL_DYNAMIC_STORAGE_BIT);
+			for (const auto& mesh : gltf.meshes) {
+				commands.reserve(commands.size() + mesh.primitives.size());
+				for (const auto prim : mesh.primitives) {
+					DrawCommand cmd = {
+						.count = prim.index_count,
+						.instance_count = 1,
+						.first_index = prim.first_index + allocation.index_header.start,
+						.base_vertex = prim.base_vertex + allocation.vertex_header.start,
+						.base_instance = 0
+					};
+					commands.push_back(cmd);
+				}
+			}
+		}
+		commandbuffer.record_commands(commands);
 		scene_dirty = false;
 	}
 }
 
-void Renderer::render() const
+void Renderer::render()
 {
+
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -124,6 +118,7 @@ void Renderer::render() const
 	auto view_proj = proj * view;
 	glUniformMatrix4fv(view_proj_uniform, 1, GL_FALSE, &view_proj[0][0]);
 
+	commandbuffer.upload_commands();
 	for (auto& node : curr_scene.nodes) {
 		for (auto& meshnode : (*node.gltf).meshnodes) {
 			auto transform = node.transform * meshnode.transform;

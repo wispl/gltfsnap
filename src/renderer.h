@@ -19,7 +19,7 @@ public:
 
 	void update_window(int new_width, int new_height);
 	void update();
-	void render() const;
+	void render();
 	void loop();
 private:
 	// window data
