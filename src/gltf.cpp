@@ -134,9 +134,9 @@ static bool load_mesh(LoadedGLTF& gltf, fastgltf::Asset& asset, fastgltf::Mesh& 
 
 		// A DrawCommand is generated for each primitive.
 		primitive.command_idx = gltf.primitive_count;
-		primitive.base_vertex = static_cast<std::size_t>(index_accessor.count);
+		primitive.base_vertex = static_cast<std::size_t>(vertices_start);
 		primitive.first_index = static_cast<std::size_t>(gltf.indices.size());
-		primitive.index_count = static_cast<std::size_t>(vertices_start);
+		primitive.index_count = static_cast<std::size_t>(index_accessor.count);
 
 		fastgltf::iterateAccessor<std::uint32_t>(asset, index_accessor, [&](std::uint32_t idx) {
 			gltf.indices.push_back(idx);
