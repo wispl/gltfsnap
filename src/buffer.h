@@ -113,7 +113,7 @@ public:
 	}
 
 	void update(Header header, std::vector<T> data) {
-		glNamedBufferSubData(buffer, header.start, header.size, data.data());
+		glNamedBufferSubData(buffer, header.start * element_size, header.size * element_size, data.data());
 	}
 private:
 	GLuint buffer;
