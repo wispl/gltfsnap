@@ -8,6 +8,10 @@
 #include <unordered_map>
 #include <vector>
 
+/// Stores information on where an allocation starts and ends in terms of
+/// lengths. When interacting with OpenGL, these values must be multiplied by
+/// the element size because OpenGL expects them in terms of sizes rather than
+/// lengths.
 struct Header {
 	std::size_t start;
 	std::size_t size;
@@ -18,12 +22,16 @@ struct Header {
 };
 
 // https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming#Persistent_mapped_streaming
+//
 // Could improve performance more, but is much more complicated to implement.
+// This allows for double or triple buffering which allows us to upload data to buffer
+// while we are rendering, from multiple threads for example, which is not
+// currently possible with this implementation.
 
-// A buffer interface which points to the GPU buffer. This keeps tracks of all
-// allocations and deallocations. Call `allocate` to get a header chunk and
-// `update` to insert or update data at a given chunk. Allocate does not insert
-// the data but only allocates data for it.
+/// A buffer interface which points to the GPU buffer. This keeps tracks of all
+/// allocations and deallocations. Call `allocate` to get a header chunk and
+/// `update` to insert or update data at a given chunk. Allocate does not insert
+/// the data but only allocates data for it.
 template <typename T>
 class Buffer {
 public:
@@ -125,13 +133,16 @@ private:
 	std::vector<Header> free_list;
 };
 
+// TODO: the header stores data in terms of lengths, but OpenGl 
 struct MeshAllocation {
 	MeshAllocation() {}
 	MeshAllocation(Header vheader, Header iheader) : vertex_header(vheader), index_header(iheader) {}
 	Header vertex_header, index_header;
 };
 
-// Handles allocated meshes
+/// Handles allocated meshes. Internally this is made up of vertices and
+/// indicies of the mesh. For every mesh, a MeshAllocation is mapped which
+/// stores where the data is located.
 class MeshBuffer {
 public:
 	MeshBuffer() {}
