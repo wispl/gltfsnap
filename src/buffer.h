@@ -155,6 +155,15 @@ private:
 	std::unordered_map<std::string, MeshAllocation> loaded_meshes;
 };
 
+// A OpenGL struct which species a draw command for MultiDrawElements.
+struct DrawCommand {
+	std::uint32_t count;		// how many indices
+	std::uint32_t instance_count;	// how many instances to draw
+	std::uint32_t first_index;	// offset to the first indice
+	std::uint32_t base_vertex;	// offset to the first vertex
+	std::uint32_t base_instance;	// offset for when drawing multiple instances
+};
+
 /// Stores DrawCommands to be uploaded to the GPU. This does not internally use
 /// a Buffer because this must map up with nodes in Scene. In other words,
 /// 	node 1, prim 1 will have command at 1
